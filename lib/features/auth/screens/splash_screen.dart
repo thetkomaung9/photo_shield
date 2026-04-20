@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme.dart';
+import '../providers/auth_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -20,8 +21,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _navigate() async {
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
-    // TODO: 로그인 상태 확인 후 분기
-    context.go('/onboarding');
+    // 저장된 토큰 확인 후 분기
+    await ref.read(authProvider.notifier).restoreSession();
+    if (!mounted) return;
+    final isAuthenticated = ref.read(authProvider).isAuthenticated;
+    context.go(isAuthenticated ? '/home' : '/onboarding');
   }
 
   @override

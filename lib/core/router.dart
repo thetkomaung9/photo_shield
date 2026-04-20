@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../features/auth/providers/auth_provider.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/onboarding_screen.dart';
 import '../features/auth/screens/login_screen.dart';
@@ -15,8 +16,27 @@ import '../features/notifications/screens/notification_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final authState = ref.watch(authProvider);
+
   return GoRouter(
     initialLocation: '/',
+    redirect: (context, state) {
+      final isAuthenticated = authState.isAuthenticated;
+      final location = state.matchedLocation;
+
+      // 보호된 경로 목록
+      final protectedPaths = [
+        '/home',
+        '/photos',
+        '/detections',
+        '/notifications',
+        '/settings',
+      ];
+      final isProtected = protectedPaths.any((p) => location.startsWith(p));
+
+      if (isProtected && !isAuthenticated) return '/login';
+      return null;
+    },
     routes: [
       GoRoute(path: '/', builder: (_, __) => const SplashScreen()),
       GoRoute(

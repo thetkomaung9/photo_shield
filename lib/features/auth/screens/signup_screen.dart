@@ -45,10 +45,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text(error)));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('가입이 완료되었습니다. 이메일을 확인해 주세요.')),
-      );
-      context.go('/login');
+      if (!mounted) return;
+      final isAuthenticated = ref.read(authProvider).isAuthenticated;
+      if (isAuthenticated) {
+        context.go('/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('가입이 완료되었습니다. 로그인해 주세요.')),
+        );
+        context.go('/login');
+      }
     }
   }
 
