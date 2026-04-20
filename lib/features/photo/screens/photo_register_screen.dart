@@ -30,12 +30,13 @@ class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
       );
     } else {
       final file = await _picker.pickImage(source: source);
-      if (file != null)
+      if (file != null) {
         setState(
           () => _selected
             ..clear()
             ..add(file),
         );
+      }
     }
   }
 

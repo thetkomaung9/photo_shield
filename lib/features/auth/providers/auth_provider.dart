@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/constants.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -30,9 +31,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// 앱 시작 시 저장된 토큰으로 인증 상태 복원
   Future<void> restoreSession() async {
-    final token = await _storage.read(key: StorageKeys.accessToken);
-    if (token != null) {
-      state = state.copyWith(isAuthenticated: true);
+    try {
+      debugPrint('Auth: restoreSession begin');
+      final token = await _storage
+          .read(key: StorageKeys.accessToken)
+          .timeout(const Duration(seconds: 5));
+      debugPrint('Auth: restoreSession token exists = ${token != null}');
+
+      state = state.copyWith(isAuthenticated: token != null);
+    } catch (e, st) {
+      debugPrint('Auth: restoreSession failed - $e');
+      debugPrintStack(stackTrace: st);
+      state = state.copyWith(isAuthenticated: false);
     }
   }
 

@@ -30,7 +30,7 @@ class NotificationScreen extends ConsumerWidget {
                     leading: CircleAvatar(
                       backgroundColor: n.isRead
                           ? const Color(0xFFF1F5F9)
-                          : AppTheme.primary.withOpacity(0.1),
+                          : AppTheme.primary.withValues(alpha: 0.1),
                       child: Icon(
                         Icons.notifications,
                         color: n.isRead

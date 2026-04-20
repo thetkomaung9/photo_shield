@@ -28,10 +28,10 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () {},
           ),
           const _SectionHeader('앱 정보'),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('버전'),
-            trailing: const Text(
+          const ListTile(
+            leading: Icon(Icons.info_outline),
+            title: Text('버전'),
+            trailing: Text(
               '1.0.0',
               style: TextStyle(color: AppTheme.textSecondary),
             ),

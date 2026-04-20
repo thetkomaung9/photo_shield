@@ -25,7 +25,7 @@ class DetectionDetailScreen extends ConsumerWidget {
               // 사진 비교
               Row(
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: _PhotoBox(
                       label: '내 원본 사진',
                       url: null, // TODO: original photo thumbnail
@@ -42,7 +42,7 @@ class DetectionDetailScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.danger.withOpacity(0.08),
+                  color: AppTheme.danger.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(

@@ -12,20 +12,47 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
+  bool _navigating = false;
+
   @override
   void initState() {
     super.initState();
-    _navigate();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigate();
+    });
   }
 
   Future<void> _navigate() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-    // 저장된 토큰 확인 후 분기
-    await ref.read(authProvider.notifier).restoreSession();
-    if (!mounted) return;
-    final isAuthenticated = ref.read(authProvider).isAuthenticated;
-    context.go(isAuthenticated ? '/home' : '/onboarding');
+    if (_navigating) return;
+    _navigating = true;
+
+    try {
+      debugPrint('Splash: startup begin');
+      await Future.delayed(const Duration(seconds: 2));
+      debugPrint('Splash: delay complete');
+
+      if (!mounted) return;
+
+      await ref
+          .read(authProvider.notifier)
+          .restoreSession()
+          .timeout(const Duration(seconds: 5));
+
+      debugPrint('Splash: session restore complete');
+
+      if (!mounted) return;
+
+      final isAuthenticated = ref.read(authProvider).isAuthenticated;
+      debugPrint(
+          'Splash: navigating to ${isAuthenticated ? '/home' : '/onboarding'}');
+      context.go(isAuthenticated ? '/home' : '/onboarding');
+    } catch (e, st) {
+      debugPrint('Splash: startup failed - $e');
+      debugPrintStack(stackTrace: st);
+
+      if (!mounted) return;
+      context.go('/onboarding');
+    }
   }
 
   @override

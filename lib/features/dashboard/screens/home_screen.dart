@@ -139,7 +139,7 @@ class _StatusBanner extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Text(
@@ -159,23 +159,23 @@ class _StatusBanner extends StatelessWidget {
 class _PlatformCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
           Expanded(
             child: _PlatformCard(
               name: '네이버 블로그',
-              color: const Color(0xFF03C75A),
+              color: Color(0xFF03C75A),
               initial: 'N',
               status: '정상',
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: _PlatformCard(
               name: '카카오스토리',
-              color: const Color(0xFFFFE812),
+              color: Color(0xFFFFE812),
               initial: 'K',
               status: '정상',
               dark: true,
@@ -210,7 +210,10 @@ class _PlatformCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+          ),
         ],
       ),
       child: Column(

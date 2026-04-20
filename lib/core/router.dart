@@ -16,13 +16,14 @@ import '../features/notifications/screens/notification_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
-      final isAuthenticated = authState.isAuthenticated;
+      final isAuthenticated = ref.read(authProvider).isAuthenticated;
       final location = state.matchedLocation;
+
+      // Skip redirect on splash - let it handle its own navigation
+      if (location == '/') return null;
 
       // 보호된 경로 목록
       final protectedPaths = [
