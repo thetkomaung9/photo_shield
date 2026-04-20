@@ -5,6 +5,9 @@ import '../../../core/theme.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../providers/auth_provider.dart';
 
+// ignore: constant_identifier_names
+const bool _useMockAuth = true; // auth_provider.dart 와 동기화
+
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -100,6 +103,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onPressed: _login,
                   isLoading: isLoading,
                 ),
+                if (_useMockAuth) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber.shade300),
+                    ),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('🧪 개발 테스트 계정',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 12)),
+                        SizedBox(height: 4),
+                        Text('이메일: test@photoshield.kr',
+                            style: TextStyle(fontSize: 12)),
+                        Text('비밀번호: Test1234!', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: () {}, // TODO: 카카오 로그인
