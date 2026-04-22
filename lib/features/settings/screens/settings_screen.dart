@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_locale.dart';
 import '../../../core/services/mock_data.dart';
 import '../../../core/theme.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
@@ -21,6 +22,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final user = MockData.currentUser;
+    final locale = ref.watch(localeProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -82,39 +85,65 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          const _SectionTitle(title: '알림'),
+          _SectionTitle(title: context.tr('language')),
+          DropdownButtonFormField<String>(
+            value: locale.languageCode,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppTheme.cardBg,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            items: [
+              DropdownMenuItem(
+                value: 'en',
+                child: Text(context.tr('english')),
+              ),
+              DropdownMenuItem(
+                value: 'ko',
+                child: Text(context.tr('korean')),
+              ),
+            ],
+            onChanged: (value) {
+              if (value == null) return;
+              ref.read(localeProvider.notifier).setLocale(Locale(value));
+            },
+          ),
+          const SizedBox(height: 24),
+          _SectionTitle(title: context.tr('notifications')),
           SwitchListTile(
             value: _push,
             onChanged: (v) => setState(() => _push = v),
-            title: const Text('푸시 알림 받기'),
+            title: Text(context.tr('receivePushNotifications')),
             activeThumbColor: AppTheme.primary,
           ),
           SwitchListTile(
             value: _autoScan,
             onChanged: (v) => setState(() => _autoScan = v),
-            title: const Text('자동 정기 검사'),
+            title: Text(context.tr('automaticPeriodicScan')),
             activeThumbColor: AppTheme.primary,
           ),
           const SizedBox(height: 24),
-          const _SectionTitle(title: '연결된 플랫폼'),
-          const ListTile(
-            leading: Icon(Icons.camera_alt_outlined,
-                color: AppTheme.instagramPink),
-            title: Text('인스타그램'),
-            subtitle: Text('데모 모드'),
-          ),
+          _SectionTitle(title: context.tr('connectedPlatforms')),
           const ListTile(
             leading:
-                Icon(Icons.facebook_rounded, color: Color(0xFF1877F2)),
+                Icon(Icons.camera_alt_outlined, color: AppTheme.instagramPink),
+            title: Text('인스타그램'),
+            subtitle: Text('Demo mode'),
+          ),
+          const ListTile(
+            leading: Icon(Icons.facebook_rounded, color: Color(0xFF1877F2)),
             title: Text('페이스북'),
-            subtitle: Text('데모 모드'),
+            subtitle: Text('Demo mode'),
           ),
           const SizedBox(height: 24),
-          const _SectionTitle(title: '앱 정보'),
-          const ListTile(
+          _SectionTitle(title: context.tr('appInfo')),
+          ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('버전'),
-            trailing: Text('1.0.0 (demo)'),
+            title: Text(context.tr('version')),
+            trailing: const Text('1.0.0 (demo)'),
           ),
         ],
       ),
