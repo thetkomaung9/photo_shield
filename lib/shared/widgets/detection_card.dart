@@ -31,7 +31,7 @@ class DetectionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _platformLabel(detection.platform),
+                      platformLabel(detection.platform),
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
@@ -65,13 +65,35 @@ class DetectionCard extends StatelessWidget {
       ),
     );
   }
-
-  String _platformLabel(String platform) => switch (platform) {
-    'naver_blog' => '네이버 블로그',
-    'kakao_story' => '카카오스토리',
-    _ => platform,
-  };
 }
+
+/// 다른 위젯에서도 동일 매핑을 재사용하기 위해 top-level 로 노출.
+String platformLabel(String platform) => switch (platform) {
+      'naver_blog' => '네이버 블로그',
+      'kakao_story' => '카카오스토리',
+      'instagram' => '인스타그램',
+      'facebook' => '페이스북',
+      _ => platform,
+    };
+
+class _PlatformVisual {
+  final Color background;
+  final Color foreground;
+  final String label;
+  const _PlatformVisual(this.background, this.foreground, this.label);
+}
+
+_PlatformVisual _visualFor(String platform) => switch (platform) {
+      'naver_blog' =>
+        const _PlatformVisual(Color(0xFF03C75A), Colors.white, 'N'),
+      'kakao_story' =>
+        const _PlatformVisual(Color(0xFFFFE812), Colors.black, 'K'),
+      'instagram' =>
+        const _PlatformVisual(Color(0xFFE1306C), Colors.white, 'IG'),
+      'facebook' =>
+        const _PlatformVisual(Color(0xFF1877F2), Colors.white, 'F'),
+      _ => const _PlatformVisual(Color(0xFF94A3B8), Colors.white, '?'),
+    };
 
 class _PlatformIcon extends StatelessWidget {
   final String platform;
@@ -79,22 +101,21 @@ class _PlatformIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final v = _visualFor(platform);
     return Container(
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: platform == 'naver_blog'
-            ? const Color(0xFF03C75A)
-            : const Color(0xFFFFE812),
+        color: v.background,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(
         child: Text(
-          platform == 'naver_blog' ? 'N' : 'K',
+          v.label,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: platform == 'naver_blog' ? Colors.white : Colors.black,
+            fontSize: v.label.length > 1 ? 14 : 18,
+            color: v.foreground,
           ),
         ),
       ),

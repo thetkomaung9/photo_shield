@@ -120,6 +120,32 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       minimumSize: const Size(double.infinity, 52),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => launchUrl(
+                            Uri.parse(ApiConstants.instagramReportUrl),
+                          ),
+                          icon: const Icon(Icons.camera_alt_outlined,
+                              color: Color(0xFFE1306C)),
+                          label: const Text('인스타그램 신고'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => launchUrl(
+                            Uri.parse(ApiConstants.facebookReportUrl),
+                          ),
+                          icon: const Icon(Icons.facebook,
+                              color: Color(0xFF1877F2)),
+                          label: const Text('페이스북 신고'),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   if (state.pdfUrl != null)
                     TextButton(

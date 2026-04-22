@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme.dart';
 import '../../../shared/widgets/primary_button.dart';
+import '../../../shared/widgets/detection_card.dart' show platformLabel;
 import '../providers/detection_provider.dart';
 
 class DetectionDetailScreen extends ConsumerWidget {
@@ -76,7 +77,7 @@ class DetectionDetailScreen extends ConsumerWidget {
               // 정보
               _InfoRow(
                 label: '플랫폼',
-                value: d.platform == 'naver_blog' ? '네이버 블로그' : '카카오스토리',
+                value: platformLabel(d.platform),
               ),
               _InfoRow(label: '탐지 시각', value: d.detectedAt.toString()),
               const SizedBox(height: 8),
