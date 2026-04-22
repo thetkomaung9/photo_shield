@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_locale.dart';
 import '../../../core/theme.dart';
 import '../../../shared/widgets/primary_button.dart';
 
@@ -14,22 +15,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  final _pages = const [
-    _OnboardingPage(
-      icon: Icons.shield_outlined,
-      title: '내 사진을 지켜드립니다',
-      desc: 'AI가 24시간 국내 SNS와 블로그를\n자동으로 모니터링합니다.',
-    ),
-    _OnboardingPage(
-      icon: Icons.notifications_active_outlined,
-      title: '도용 즉시 알림',
-      desc: '내 사진이 발견되면 즉시 푸시 알림으로\n알려드립니다.',
-    ),
-    _OnboardingPage(
-      icon: Icons.description_outlined,
-      title: '원클릭 신고 지원',
-      desc: '증거 PDF를 자동 생성하고\n경찰청 ECRM 신고를 도와드립니다.',
-    ),
+  final _pageIcons = const [
+    Icons.shield_outlined,
+    Icons.notifications_active_outlined,
+    Icons.description_outlined,
   ];
 
   @override
@@ -42,30 +31,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               alignment: Alignment.topRight,
               child: TextButton(
                 onPressed: () => context.go('/login'),
-                child: const Text('건너뛰기'),
+                child: Text(context.tr('skip')),
               ),
             ),
             Expanded(
               child: PageView.builder(
                 controller: _controller,
-                itemCount: _pages.length,
+                itemCount: _pageIcons.length,
                 onPageChanged: (i) => setState(() => _page = i),
-                itemBuilder: (_, i) => _pages[i],
+                itemBuilder: (_, i) => _OnboardingPage(
+                  icon: _pageIcons[i],
+                  title: context.tr('onboardingTitle${i + 1}'),
+                  desc: context.tr('onboardingDesc${i + 1}'),
+                ),
               ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
-                _pages.length,
+                _pageIcons.length,
                 (i) => AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   width: _page == i ? 20 : 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: _page == i
-                        ? AppTheme.primary
-                        : const Color(0xFFCBD5E1),
+                    color:
+                        _page == i ? AppTheme.primary : const Color(0xFFCBD5E1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -75,9 +67,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: PrimaryButton(
-                label: _page == _pages.length - 1 ? '시작하기' : '다음',
+                label: _page == _pageIcons.length - 1
+                    ? context.tr('getStarted')
+                    : context.tr('next'),
                 onPressed: () {
-                  if (_page == _pages.length - 1) {
+                  if (_page == _pageIcons.length - 1) {
                     context.go('/login');
                   } else {
                     _controller.nextPage(
@@ -91,7 +85,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => context.go('/login'),
-              child: const Text('이미 계정이 있으신가요? 로그인'),
+              child: Text(context.tr('alreadyHasAccountLogin')),
             ),
             const SizedBox(height: 16),
           ],

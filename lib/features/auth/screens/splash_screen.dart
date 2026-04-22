@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_locale.dart';
 import '../../../core/theme.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
 
@@ -41,28 +42,28 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              PhotoShieldLogoMark(
+            children: [
+              const PhotoShieldLogoMark(
                 size: 160,
                 shieldColor: Colors.white,
                 lensColor: Color(0xFF1E3A8A),
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               Text(
-                '포토쉴드 코리아',
+                context.tr('appTitle'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 34,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Text(
-                '내 사진을 지켜드립니다',
+                context.tr('splashSubtitle'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 18,
                 ),

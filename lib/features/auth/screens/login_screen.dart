@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_locale.dart';
 import '../../../core/theme.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../providers/auth_provider.dart';
@@ -57,25 +58,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 40),
-                const Text(
-                  '로그인',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                Text(
+                  context.tr('loginTitle'),
+                  style: const TextStyle(
+                      fontSize: 28, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'PhotoShield Korea에 오신 것을 환영합니다',
-                  style: TextStyle(color: AppTheme.textSecondary),
+                Text(
+                  context.tr('loginWelcome'),
+                  style: const TextStyle(color: AppTheme.textSecondary),
                 ),
                 const SizedBox(height: 40),
                 TextFormField(
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: '이메일',
-                    prefixIcon: Icon(Icons.email_outlined),
+                  decoration: InputDecoration(
+                    labelText: context.tr('email'),
+                    prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   validator: (v) => v == null || !v.contains('@')
-                      ? '올바른 이메일 형식을 입력해 주세요.'
+                      ? context.tr('enterValidEmail')
                       : null,
                 ),
                 const SizedBox(height: 16),
@@ -83,7 +85,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   controller: _passwordCtrl,
                   obscureText: _obscure,
                   decoration: InputDecoration(
-                    labelText: '비밀번호',
+                    labelText: context.tr('password'),
                     prefixIcon: const Icon(Icons.lock_outlined),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -94,12 +96,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
-                  validator: (v) =>
-                      v == null || v.length < 8 ? '비밀번호를 입력해 주세요.' : null,
+                  validator: (v) => v == null || v.length < 8
+                      ? context.tr('enterPassword')
+                      : null,
                 ),
                 const SizedBox(height: 24),
                 PrimaryButton(
-                  label: '로그인',
+                  label: context.tr('login'),
                   onPressed: _login,
                   isLoading: isLoading,
                 ),
@@ -112,16 +115,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.amber.shade300),
                     ),
-                    child: const Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('🧪 개발 테스트 계정',
-                            style: TextStyle(
+                        Text('🧪 ${context.tr('devTestAccount')}',
+                            style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 12)),
-                        SizedBox(height: 4),
-                        Text('이메일: test@photoshield.kr',
-                            style: TextStyle(fontSize: 12)),
-                        Text('비밀번호: Test1234!', style: TextStyle(fontSize: 12)),
+                        const SizedBox(height: 4),
+                        Text(
+                            '${context.tr('testEmailLabel')}: test@photoshield.kr',
+                            style: const TextStyle(fontSize: 12)),
+                        Text('${context.tr('testPasswordLabel')}: Test1234!',
+                            style: const TextStyle(fontSize: 12)),
                       ],
                     ),
                   ),
@@ -136,9 +141,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       color: Colors.black,
                     ),
                   ),
-                  label: const Text(
-                    '카카오로 로그인',
-                    style: TextStyle(color: Colors.black),
+                  label: Text(
+                    context.tr('loginWithKakao'),
+                    style: const TextStyle(color: Colors.black),
                   ),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 52),
@@ -153,7 +158,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Center(
                   child: TextButton(
                     onPressed: () => context.go('/signup'),
-                    child: const Text('계정이 없으신가요? 회원가입'),
+                    child: Text(context.tr('noAccountSignup')),
                   ),
                 ),
               ],
