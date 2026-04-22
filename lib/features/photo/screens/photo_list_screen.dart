@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_locale.dart';
 import '../../../core/theme.dart';
 import '../../../shared/models/photo.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
@@ -26,14 +27,15 @@ class PhotoListScreen extends ConsumerWidget {
       ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('에러: $e')),
+        error: (e, _) =>
+            Center(child: Text('${context.tr('errorPrefix')}: $e')),
         data: (photos) => Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '보호 중인 사진',
+              Text(
+                context.tr('photoListTitle'),
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -42,7 +44,9 @@ class PhotoListScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '총 ${photos.length}장의 사진을 AI가 모니터링합니다.',
+                context.trf('photoListSummary', {
+                  'count': photos.length.toString(),
+                }),
                 style: const TextStyle(
                   color: AppTheme.textSecondary,
                   fontSize: 13,
@@ -71,8 +75,8 @@ class PhotoListScreen extends ConsumerWidget {
                 child: ElevatedButton.icon(
                   onPressed: () => context.go('/photos/register'),
                   icon: const Icon(Icons.add_photo_alternate_outlined),
-                  label: const Text(
-                    '사진 등록',
+                  label: Text(
+                    context.tr('registerPhoto'),
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
@@ -104,13 +108,14 @@ class _EmptyState extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(Icons.shield_outlined, size: 64, color: AppTheme.textSecondary),
-          SizedBox(height: 12),
+        children: [
+          const Icon(Icons.shield_outlined,
+              size: 64, color: AppTheme.textSecondary),
+          const SizedBox(height: 12),
           Text(
-            '아직 등록된 사진이 없습니다.\n사진을 등록하고 모니터링을 시작해 보세요.',
+            context.tr('photoListEmpty'),
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textSecondary),
+            style: const TextStyle(color: AppTheme.textSecondary),
           ),
         ],
       ),
@@ -152,10 +157,8 @@ class _PhotoTile extends StatelessWidget {
               child: photo.thumbnailUrl == null
                   ? Container(color: Colors.grey.shade200)
                   : _isLocal
-                      ? Image.file(File(photo.thumbnailUrl!),
-                          fit: BoxFit.cover)
-                      : Image.network(photo.thumbnailUrl!,
-                          fit: BoxFit.cover),
+                      ? Image.file(File(photo.thumbnailUrl!), fit: BoxFit.cover)
+                      : Image.network(photo.thumbnailUrl!, fit: BoxFit.cover),
             ),
           ),
           Padding(
@@ -175,7 +178,9 @@ class _PhotoTile extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    photo.status == 'monitoring' ? '모니터링 중' : '학습 중',
+                    photo.status == 'monitoring'
+                        ? context.tr('photoStatusMonitoring')
+                        : context.tr('photoStatusLearning'),
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

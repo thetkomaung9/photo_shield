@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_locale.dart';
 import '../../../core/theme.dart';
 import '../../../shared/models/detection.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
@@ -31,10 +32,11 @@ class DetectionListScreen extends ConsumerWidget {
       ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('에러: $e')),
+        error: (e, _) =>
+            Center(child: Text('${context.tr('errorPrefix')}: $e')),
         data: (list) {
           if (list.isEmpty) {
-            return const Center(child: Text('탐지된 결과가 없습니다.'));
+            return Center(child: Text(context.tr('detectionNoResults')));
           }
           final latest = list.first;
           final rest = list.length > 1 ? list.sublist(1) : <Detection>[];
@@ -49,8 +51,8 @@ class DetectionListScreen extends ConsumerWidget {
                 _AlertBanner(detection: latest),
                 const SizedBox(height: 24),
                 if (rest.isNotEmpty) ...[
-                  const Text(
-                    '이전 탐지 기록',
+                  Text(
+                    context.tr('previousDetections'),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -96,8 +98,8 @@ class _AlertBanner extends StatelessWidget {
               color: AppTheme.danger,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            child: const Text(
-              '위험 감지!',
+            child: Text(
+              context.tr('dangerDetected'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,
@@ -107,10 +109,10 @@ class _AlertBanner extends StatelessWidget {
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 20, 20, 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
             child: Text(
-              '무단 도용 의심 사례가 발견되었습니다',
+              context.tr('unauthorizedUseFound'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 17,
@@ -125,9 +127,9 @@ class _AlertBanner extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Expanded(
+                Expanded(
                   child: _LabeledPhoto(
-                    label: '내 원본 사진',
+                    label: context.tr('myOriginalPhoto'),
                     labelColor: AppTheme.textPrimary,
                   ),
                 ),
@@ -145,7 +147,7 @@ class _AlertBanner extends StatelessWidget {
                 ),
                 Expanded(
                   child: _LabeledPhoto(
-                    label: '가짜 인스타 프로필',
+                    label: context.tr('fakeInstagramProfile'),
                     labelColor: AppTheme.danger,
                     profile: detection,
                   ),
@@ -173,7 +175,7 @@ class _AlertBanner extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                child: const Text('상세 보기'),
+                child: Text(context.tr('viewDetails')),
               ),
             ),
           ),
@@ -233,8 +235,8 @@ class _LabeledPhoto extends StatelessWidget {
                         color: AppTheme.danger,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Text(
-                        '도용 진행중',
+                      child: Text(
+                        context.tr('infringementInProgress'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 11,
@@ -255,13 +257,8 @@ class _PastDetectionCard extends StatelessWidget {
   final Detection detection;
   const _PastDetectionCard({required this.detection});
 
-  String _platformLabel() => switch (detection.platform) {
-        'instagram' => '인스타그램',
-        'facebook' => '페이스북',
-        'naver_blog' => '네이버 블로그',
-        'kakao_story' => '카카오스토리',
-        _ => detection.platform,
-      };
+  String _platformLabel(BuildContext context) =>
+      AppLocale.platform(context, detection.platform);
 
   @override
   Widget build(BuildContext context) {
@@ -298,7 +295,7 @@ class _PastDetectionCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _platformLabel(),
+                    _platformLabel(context),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -306,7 +303,7 @@ class _PastDetectionCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '유사도 ${(detection.similarity * 100).toStringAsFixed(1)}% · ${detection.status.label}',
+                    '${context.tr('similarity')} ${(detection.similarity * 100).toStringAsFixed(1)}% · ${AppLocale.detectionStatus(context, detection.status)}',
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppTheme.textSecondary,

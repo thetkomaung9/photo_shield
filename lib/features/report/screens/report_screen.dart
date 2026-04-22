@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants.dart';
+import '../../../core/localization/app_locale.dart';
 import '../../../core/theme.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
 import '../providers/report_provider.dart';
@@ -33,9 +34,9 @@ class ReportScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 8),
-              const Center(
+              Center(
                 child: Text(
-                  '신고하기',
+                  context.tr('reportTitle'),
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w900,
@@ -46,21 +47,21 @@ class ReportScreen extends ConsumerWidget {
               const SizedBox(height: 28),
               _ReportTile(
                 icon: const _InstagramIcon(),
-                label: '인스타그램 신고',
+                label: context.tr('reportInstagram'),
                 onTap: () => _launch(ApiConstants.instagramReportUrl),
               ),
               const SizedBox(height: 12),
               _ReportTile(
                 icon: const _KakaoIcon(),
-                label: '카카오스토리 신고',
+                label: context.tr('reportKakaoStory'),
                 onTap: () => _launch(
                     'https://cs.kakao.com/helps?service=8&category=251'),
               ),
               const SizedBox(height: 12),
               _ReportTile(
-                icon: const Icon(Icons.gavel,
-                    color: AppTheme.primary, size: 26),
-                label: '법적 대응 가이드',
+                icon:
+                    const Icon(Icons.gavel, color: AppTheme.primary, size: 26),
+                label: context.tr('legalGuide'),
                 onTap: () => _launch(ApiConstants.ecrmUrl),
               ),
               const Spacer(),
@@ -69,11 +70,9 @@ class ReportScreen extends ConsumerWidget {
                 height: 60,
                 child: ElevatedButton(
                   onPressed: () {
-                    ref
-                        .read(reportProvider(detectionId).notifier)
-                        .generate();
+                    ref.read(reportProvider(detectionId).notifier).generate();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('신고 절차에 착수했습니다.')),
+                      SnackBar(content: Text(context.tr('reportStarted'))),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -83,8 +82,8 @@ class ReportScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text(
-                    '즉시 신고 착수',
+                  child: Text(
+                    context.tr('startReportNow'),
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -126,8 +125,7 @@ class _ReportTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             color: Colors.white,
@@ -184,8 +182,8 @@ class _InstagramIcon extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
       ),
-      child: const Icon(Icons.camera_alt_rounded,
-          color: Colors.white, size: 16),
+      child:
+          const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 16),
     );
   }
 }

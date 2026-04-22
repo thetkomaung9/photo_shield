@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_locale.dart';
 import '../../../core/theme.dart';
 import '../../../shared/models/notification_item.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
@@ -24,7 +25,8 @@ class NotificationScreen extends ConsumerWidget {
       ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('에러: $e')),
+        error: (e, _) =>
+            Center(child: Text('${context.tr('errorPrefix')}: $e')),
         data: (items) => RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(notificationsProvider);
@@ -33,8 +35,7 @@ class NotificationScreen extends ConsumerWidget {
           child: items.isEmpty
               ? const _Empty()
               : ListView.separated(
-                  padding:
-                      const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   itemCount: items.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (_, i) => _NotificationCard(
@@ -61,17 +62,17 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      children: const [
+      children: [
         SizedBox(height: 120),
-        Center(
+        const Center(
           child: Icon(Icons.notifications_off_outlined,
               size: 64, color: AppTheme.textSecondary),
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Center(
           child: Text(
-            '아직 활동 기록이 없습니다.',
-            style: TextStyle(color: AppTheme.textSecondary),
+            context.tr('notificationEmpty'),
+            style: const TextStyle(color: AppTheme.textSecondary),
           ),
         ),
       ],
@@ -106,12 +107,8 @@ class _NotificationCard extends StatelessWidget {
     }
   }
 
-  String _time() {
-    final diff = DateTime.now().difference(item.createdAt);
-    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
-    if (diff.inHours < 24) return '${diff.inHours}시간 전';
-    return '${diff.inDays}일 전';
-  }
+  String _time(BuildContext context) =>
+      AppLocale.relativeTime(context, item.createdAt);
 
   @override
   Widget build(BuildContext context) {
@@ -125,9 +122,8 @@ class _NotificationCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: item.isRead
-                ? Colors.grey.shade200
-                : c.withValues(alpha: 0.4),
+            color:
+                item.isRead ? Colors.grey.shade200 : c.withValues(alpha: 0.4),
           ),
           boxShadow: [
             BoxShadow(
@@ -155,7 +151,11 @@ class _NotificationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.message,
+                    AppLocale.notificationMessage(
+                      context,
+                      item.notificationId,
+                      item.message,
+                    ),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight:
@@ -165,7 +165,7 @@ class _NotificationCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _time(),
+                    _time(context),
                     style: const TextStyle(
                       fontSize: 11,
                       color: AppTheme.textSecondary,

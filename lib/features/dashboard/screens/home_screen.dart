@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_locale.dart';
 import '../../../core/services/mock_data.dart';
 import '../../../core/theme.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
@@ -24,15 +25,15 @@ class HomeScreen extends ConsumerWidget {
         title: const PhotoShieldAppBarTitle(),
         actions: [
           IconButton(
-            tooltip: '알림',
+            tooltip: context.tr('homeNotifTooltip'),
             icon: const Icon(Icons.notifications_outlined,
                 color: Colors.white, size: 26),
             onPressed: () => context.go('/records'),
           ),
           IconButton(
-            tooltip: '설정',
-            icon:
-                const Icon(Icons.settings_outlined, color: Colors.white, size: 26),
+            tooltip: context.tr('homeSettingsTooltip'),
+            icon: const Icon(Icons.settings_outlined,
+                color: Colors.white, size: 26),
             onPressed: () => context.go('/settings'),
           ),
           const SizedBox(width: 4),
@@ -42,7 +43,7 @@ class HomeScreen extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
         children: [
           Text(
-            '안녕하세요, ${user.name}님',
+            context.trf('helloUser', {'name': user.name}),
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -54,8 +55,8 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           _RecentScanCard(lastScan: lastScan),
           const SizedBox(height: 28),
-          const Text(
-            '활동 기록',
+          Text(
+            context.tr('activityRecords'),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -99,11 +100,11 @@ class _SafetyRing extends StatelessWidget {
                 ],
               ),
             ),
-            const Column(
+            Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '안전함',
+                  context.tr('safeHeadline'),
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.w900,
@@ -113,9 +114,9 @@ class _SafetyRing extends StatelessWidget {
                 ),
                 SizedBox(height: 12),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 32),
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Text(
-                    '내 사진은 모든 플랫폼에서\n안전하게 보호되고 있습니다',
+                    context.tr('safeDescription'),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12,
@@ -136,13 +137,6 @@ class _SafetyRing extends StatelessWidget {
 class _RecentScanCard extends StatelessWidget {
   final DateTime lastScan;
   const _RecentScanCard({required this.lastScan});
-
-  String _format(DateTime t) {
-    final diff = DateTime.now().difference(t);
-    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
-    if (diff.inHours < 24) return '${diff.inHours}시간 전';
-    return '${diff.inDays}일 전';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +168,9 @@ class _RecentScanCard extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              '최근 검사: ${_format(lastScan)}',
+              context.trf('recentScan', {
+                'value': AppLocale.relativeTime(context, lastScan),
+              }),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -235,7 +231,7 @@ class _PlatformCard extends StatelessWidget {
           _PlatformIcon(id: platform.id),
           const SizedBox(height: 10),
           Text(
-            platform.name,
+            AppLocale.platform(context, platform.id),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
@@ -253,13 +249,11 @@ class _PlatformCard extends StatelessWidget {
               ),
             ),
             child: Text(
-              platform.status,
+              platform.isSafe ? context.tr('statusSafe') : platform.status,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: platform.isSafe
-                    ? AppTheme.safe
-                    : AppTheme.danger,
+                color: platform.isSafe ? AppTheme.safe : AppTheme.danger,
               ),
             ),
           ),

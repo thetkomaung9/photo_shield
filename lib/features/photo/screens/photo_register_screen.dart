@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/localization/app_locale.dart';
 import '../../../core/theme.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
 import '../providers/photo_provider.dart';
@@ -44,12 +45,11 @@ class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
     if (!mounted) return;
     setState(() => _uploading = false);
     if (err != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(err)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('사진이 등록되었습니다.')),
+      SnackBar(content: Text(context.tr('photoRegistered'))),
     );
     context.go('/protect');
   }
@@ -79,8 +79,8 @@ class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
           child: Column(
             children: [
               const SizedBox(height: 8),
-              const Text(
-                '내 사진 등록',
+              Text(
+                context.tr('photoRegisterTitle'),
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w900,
@@ -95,8 +95,8 @@ class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'AI가 당신의 얼굴을 학습하여 SNS를 모니터링합니다.',
+              Text(
+                context.tr('photoRegisterDesc'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
@@ -125,8 +125,8 @@ class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
                             strokeWidth: 2.5,
                           ),
                         )
-                      : const Text(
-                          '갤러리에서 선택',
+                      : Text(
+                          context.tr('selectFromGallery'),
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -154,12 +154,12 @@ class _DashedDropzone extends StatelessWidget {
         child: files.isEmpty
             ? Column(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(Icons.add, size: 80, color: Color(0xFFB0B5BD)),
-                  SizedBox(height: 8),
+                children: [
+                  const Icon(Icons.add, size: 80, color: Color(0xFFB0B5BD)),
+                  const SizedBox(height: 8),
                   Text(
-                    '사진을 업로드하세요',
-                    style: TextStyle(
+                    context.tr('uploadPhotoPrompt'),
+                    style: const TextStyle(
                       fontSize: 16,
                       color: Color(0xFF7B7F86),
                     ),

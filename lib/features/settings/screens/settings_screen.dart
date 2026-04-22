@@ -130,12 +130,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ListTile(
             leading:
                 Icon(Icons.camera_alt_outlined, color: AppTheme.instagramPink),
-            title: const Text('인스타그램'),
+            title: Text(context.tr('platformInstagram')),
             subtitle: Text(context.tr('demoMode')),
           ),
           ListTile(
             leading: Icon(Icons.facebook_rounded, color: Color(0xFF1877F2)),
-            title: const Text('페이스북'),
+            title: Text(context.tr('platformFacebook')),
             subtitle: Text(context.tr('demoMode')),
           ),
           const SizedBox(height: 24),

@@ -149,6 +149,8 @@ class AppLocale {
       'legalGuide': 'Legal response guide',
       'startReportNow': 'Start report now',
       'reportStarted': 'Reporting process started.',
+      'noSelectedPhotos': 'No photos selected.',
+      'photoLimitExceeded': 'Photo upload limit (5) exceeded.',
       'notifDemo1': 'Potential misuse found on Instagram. (SooYoung_Love)',
       'notifDemo2':
           'Today\'s scheduled scan is complete. No new threats were found.',
@@ -255,6 +257,8 @@ class AppLocale {
       'legalGuide': '법적 대응 가이드',
       'startReportNow': '즉시 신고 착수',
       'reportStarted': '신고 절차에 착수했습니다.',
+      'noSelectedPhotos': '선택된 사진이 없습니다.',
+      'photoLimitExceeded': '사진 등록 한도(5장)를 초과했습니다.',
       'notifDemo1': '인스타그램에서 무단 도용 의심 사례가 발견되었습니다. (SooYoung_Love)',
       'notifDemo2': '오늘의 정기 검사가 완료되었습니다. 새로운 위협은 발견되지 않았습니다.',
       'notifDemo3': '네이버 블로그 도용 신고가 접수되어 처리 중입니다.',
@@ -326,6 +330,17 @@ class AppLocale {
       return t(context, 'notifDemo3');
     }
     return fallback;
+  }
+
+  static String maybeTranslateRaw(BuildContext context, String raw) {
+    if (raw == '선택된 사진이 없습니다.' || raw == 'No photos selected.') {
+      return t(context, 'noSelectedPhotos');
+    }
+    if (raw == '사진 등록 한도(5장)를 초과했습니다.' ||
+        raw == 'Photo upload limit (5) exceeded.') {
+      return t(context, 'photoLimitExceeded');
+    }
+    return raw;
   }
 }
 

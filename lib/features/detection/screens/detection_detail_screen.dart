@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_locale.dart';
 import '../../../core/theme.dart';
 import '../../../shared/models/detection.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
@@ -29,21 +30,24 @@ class DetectionDetailScreen extends ConsumerWidget {
       ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('에러: $e')),
+        error: (e, _) =>
+            Center(child: Text('${context.tr('errorPrefix')}: $e')),
         data: (d) => ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           children: [
             _DetailHero(detection: d),
             const SizedBox(height: 24),
-            _InfoTile(label: '플랫폼', value: _platformLabel(d.platform)),
             _InfoTile(
-              label: '유사도',
+                label: context.tr('platform'),
+                value: _platformLabel(context, d.platform)),
+            _InfoTile(
+              label: context.tr('similarity'),
               value: '${(d.similarity * 100).toStringAsFixed(1)}%',
               valueColor: AppTheme.danger,
             ),
-            _InfoTile(label: '발견 URL', value: d.foundUrl),
+            _InfoTile(label: context.tr('foundUrl'), value: d.foundUrl),
             _InfoTile(
-              label: '탐지 시각',
+              label: context.tr('detectedAt'),
               value: d.detectedAt.toString().split('.').first,
             ),
             const SizedBox(height: 24),
@@ -51,7 +55,7 @@ class DetectionDetailScreen extends ConsumerWidget {
               height: 60,
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.flag_rounded),
-                label: const Text('신고하기'),
+                label: Text(context.tr('report')),
                 onPressed: () =>
                     context.go('/detections/${d.detectionId}/report'),
                 style: ElevatedButton.styleFrom(
@@ -69,13 +73,8 @@ class DetectionDetailScreen extends ConsumerWidget {
     );
   }
 
-  String _platformLabel(String p) => switch (p) {
-        'instagram' => '인스타그램',
-        'facebook' => '페이스북',
-        'naver_blog' => '네이버 블로그',
-        'kakao_story' => '카카오스토리',
-        _ => p,
-      };
+  String _platformLabel(BuildContext context, String p) =>
+      AppLocale.platform(context, p);
 }
 
 class _DetailHero extends StatelessWidget {
@@ -105,8 +104,8 @@ class _DetailHero extends StatelessWidget {
               color: AppTheme.danger,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            child: const Text(
-              '위험 감지!',
+            child: Text(
+              context.tr('dangerDetected'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,
@@ -122,9 +121,9 @@ class _DetailHero extends StatelessWidget {
               children: [
                 Expanded(
                   child: Column(
-                    children: const [
+                    children: [
                       Text(
-                        '내 원본 사진',
+                        context.tr('myOriginalPhoto'),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -155,8 +154,8 @@ class _DetailHero extends StatelessWidget {
                 Expanded(
                   child: Column(
                     children: [
-                      const Text(
-                        '가짜 인스타 프로필',
+                      Text(
+                        context.tr('fakeInstagramProfile'),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -167,7 +166,7 @@ class _DetailHero extends StatelessWidget {
                       _ThumbnailBox(
                         url: detection.screenshotUrl ??
                             'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-                        badge: '도용 진행중',
+                        badge: context.tr('infringementInProgress'),
                       ),
                     ],
                   ),
