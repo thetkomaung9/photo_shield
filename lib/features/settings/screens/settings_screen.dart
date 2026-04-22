@@ -127,16 +127,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 24),
           _SectionTitle(title: context.tr('connectedPlatforms')),
-          const ListTile(
+          ListTile(
             leading:
                 Icon(Icons.camera_alt_outlined, color: AppTheme.instagramPink),
-            title: Text('인스타그램'),
-            subtitle: Text('Demo mode'),
+            title: const Text('인스타그램'),
+            subtitle: Text(context.tr('demoMode')),
           ),
-          const ListTile(
+          ListTile(
             leading: Icon(Icons.facebook_rounded, color: Color(0xFF1877F2)),
-            title: Text('페이스북'),
-            subtitle: Text('Demo mode'),
+            title: const Text('페이스북'),
+            subtitle: Text(context.tr('demoMode')),
           ),
           const SizedBox(height: 24),
           _SectionTitle(title: context.tr('appInfo')),
