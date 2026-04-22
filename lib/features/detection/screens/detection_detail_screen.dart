@@ -1,182 +1,253 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import '../../../core/theme.dart';
-import '../../../shared/widgets/primary_button.dart';
-import '../../../shared/widgets/detection_card.dart' show platformLabel;
+import '../../../shared/models/detection.dart';
+import '../../../shared/widgets/photoshield_logo.dart';
 import '../providers/detection_provider.dart';
 
+/// 탐지 상세 — 위험 알림 목업과 동일한 비교 카드 + 신고하기 진입점.
 class DetectionDetailScreen extends ConsumerWidget {
   final String id;
   const DetectionDetailScreen({super.key, required this.id});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detectionAsync = ref.watch(detectionDetailProvider(id));
+    final async = ref.watch(detectionDetailProvider(id));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('탐지 결과 상세')),
-      body: detectionAsync.when(
-        data: (d) => SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 사진 비교
-              Row(
-                children: [
-                  const Expanded(
-                    child: _PhotoBox(
-                      label: '내 원본 사진',
-                      url: null, // TODO: original photo thumbnail
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _PhotoBox(label: '도용 의심 사진', url: d.screenshotUrl),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // 유사도
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.danger.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.analytics_outlined,
-                      color: AppTheme.danger,
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'AI 유사도 분석',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        Text(
-                          '${(d.similarity * 100).toStringAsFixed(1)}% 일치',
-                          style: const TextStyle(
-                            color: AppTheme.danger,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              // 정보
-              _InfoRow(
-                label: '플랫폼',
-                value: platformLabel(d.platform),
-              ),
-              _InfoRow(label: '탐지 시각', value: d.detectedAt.toString()),
-              const SizedBox(height: 8),
-              const Text(
-                '발견 URL',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 4),
-              GestureDetector(
-                onTap: () => launchUrl(Uri.parse(d.foundUrl)),
-                child: Text(
-                  d.foundUrl,
-                  style: const TextStyle(
-                    color: AppTheme.primary,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              PrimaryButton(
-                label: '신고하기',
-                onPressed: () => context.go('/detections/$id/report'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () {
-                  // TODO: PATCH status = false_positive
-                },
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 52),
-                ),
-                child: const Text('오탐지 신고'),
-              ),
-            ],
-          ),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: AppTheme.primary,
+        toolbarHeight: 64,
+        title: const PhotoShieldAppBarTitle(),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.go('/monitor'),
         ),
+      ),
+      body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('정보를 불러오지 못했습니다.')),
+        error: (e, _) => Center(child: Text('에러: $e')),
+        data: (d) => ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          children: [
+            _DetailHero(detection: d),
+            const SizedBox(height: 24),
+            _InfoTile(label: '플랫폼', value: _platformLabel(d.platform)),
+            _InfoTile(
+              label: '유사도',
+              value: '${(d.similarity * 100).toStringAsFixed(1)}%',
+              valueColor: AppTheme.danger,
+            ),
+            _InfoTile(label: '발견 URL', value: d.foundUrl),
+            _InfoTile(
+              label: '탐지 시각',
+              value: d.detectedAt.toString().split('.').first,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              height: 60,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.flag_rounded),
+                label: const Text('신고하기'),
+                onPressed: () =>
+                    context.go('/detections/${d.detectionId}/report'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.danger,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _platformLabel(String p) => switch (p) {
+        'instagram' => '인스타그램',
+        'facebook' => '페이스북',
+        'naver_blog' => '네이버 블로그',
+        'kakao_story' => '카카오스토리',
+        _ => p,
+      };
+}
+
+class _DetailHero extends StatelessWidget {
+  final Detection detection;
+  const _DetailHero({required this.detection});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 18),
+            decoration: const BoxDecoration(
+              color: AppTheme.danger,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: const Text(
+              '위험 감지!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    children: const [
+                      Text(
+                        '내 원본 사진',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      _ThumbnailBox(
+                        url:
+                            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(top: 50),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppTheme.danger,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Icon(Icons.double_arrow,
+                        color: Colors.white, size: 18),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    children: [
+                      const Text(
+                        '가짜 인스타 프로필',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: AppTheme.danger,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      _ThumbnailBox(
+                        url: detection.screenshotUrl ??
+                            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+                        badge: '도용 진행중',
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _PhotoBox extends StatelessWidget {
-  final String label;
-  final String? url;
-  const _PhotoBox({required this.label, this.url});
+class _ThumbnailBox extends StatelessWidget {
+  final String url;
+  final String? badge;
+  const _ThumbnailBox({required this.url, this.badge});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          height: 160,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(12),
+    return AspectRatio(
+      aspectRatio: 1,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(12),
+          image: DecorationImage(
+            image: NetworkImage(url),
+            fit: BoxFit.cover,
+            onError: (_, __) {},
           ),
-          child: url != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    url!,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
+        ),
+        child: badge != null
+            ? Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  margin: const EdgeInsets.all(6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.danger,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                )
-              : const Center(
-                  child: Icon(
-                    Icons.image_outlined,
-                    size: 40,
-                    color: AppTheme.textSecondary,
+                  child: Text(
+                    badge!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-        ),
-      ],
+              )
+            : null,
+      ),
     );
   }
 }
 
-class _InfoRow extends StatelessWidget {
+class _InfoTile extends StatelessWidget {
   final String label;
   final String value;
-  const _InfoRow({required this.label, required this.value});
+  final Color? valueColor;
+  const _InfoTile({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppTheme.cardBg,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 80,
@@ -185,13 +256,18 @@ class _InfoRow extends StatelessWidget {
               style: const TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 13,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: valueColor ?? AppTheme.textPrimary,
+              ),
             ),
           ),
         ],

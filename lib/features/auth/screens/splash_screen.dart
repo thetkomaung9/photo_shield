@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme.dart';
-import '../providers/auth_provider.dart';
 
+import '../../../core/theme.dart';
+import '../../../shared/widgets/photoshield_logo.dart';
+
+/// 데모 모드 스플래시.
+///
+/// 짙은 네이비 배경 + 가운데 방패 + 카메라 렌즈 로고 + 한국어 타이포.
+/// 약 2초 후 무조건 `/home` 으로 진입한다 — 로그인/온보딩은 표시하지 않는다.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -12,85 +17,58 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
-  bool _navigating = false;
+  bool _navigated = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _navigate();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _go());
   }
 
-  Future<void> _navigate() async {
-    if (_navigating) return;
-    _navigating = true;
-
-    try {
-      debugPrint('Splash: startup begin');
-      await Future.delayed(const Duration(seconds: 2));
-      debugPrint('Splash: delay complete');
-
-      if (!mounted) return;
-
-      await ref
-          .read(authProvider.notifier)
-          .restoreSession()
-          .timeout(const Duration(seconds: 5));
-
-      debugPrint('Splash: session restore complete');
-
-      if (!mounted) return;
-
-      final isAuthenticated = ref.read(authProvider).isAuthenticated;
-      debugPrint(
-          'Splash: navigating to ${isAuthenticated ? '/home' : '/onboarding'}');
-      context.go(isAuthenticated ? '/home' : '/onboarding');
-    } catch (e, st) {
-      debugPrint('Splash: startup failed - $e');
-      debugPrintStack(stackTrace: st);
-
-      if (!mounted) return;
-      context.go('/onboarding');
-    }
+  Future<void> _go() async {
+    if (_navigated) return;
+    _navigated = true;
+    await Future.delayed(const Duration(milliseconds: 2200));
+    if (!mounted) return;
+    context.go('/home');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primary,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              PhotoShieldLogoMark(
+                size: 160,
+                shieldColor: Colors.white,
+                lensColor: Color(0xFF1E3A8A),
               ),
-              child: const Icon(
-                Icons.shield,
-                size: 48,
-                color: AppTheme.primary,
+              SizedBox(height: 32),
+              Text(
+                '포토쉴드 코리아',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 34,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'PhotoShield Korea',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+              SizedBox(height: 12),
+              Text(
+                '내 사진을 지켜드립니다',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 18,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '내 사진을 지켜드립니다',
-              style: TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

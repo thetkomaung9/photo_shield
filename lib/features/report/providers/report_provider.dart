@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/api_service.dart';
 
 class ReportState {
   final bool isLoading;
@@ -14,22 +13,21 @@ class ReportState {
       );
 }
 
+/// 데모 모드 신고 리포트 생성 — 백엔드 호출 없이 항상 성공한다.
 class ReportNotifier extends FamilyNotifier<ReportState, String> {
   @override
   ReportState build(String arg) => const ReportState();
 
   Future<void> generate() async {
     state = const ReportState(isLoading: true);
-    try {
-      final res = await ApiService().dio.post('/detections/$arg/report');
-      state = ReportState(pdfUrl: res.data['pdf_url']);
-    } catch (_) {
-      state = const ReportState(error: 'PDF 생성 실패');
-    }
+    await Future.delayed(const Duration(milliseconds: 800));
+    state = ReportState(
+      pdfUrl: 'https://example.com/photoshield/reports/$arg.pdf',
+    );
   }
 }
 
 final reportProvider =
     NotifierProviderFamily<ReportNotifier, ReportState, String>(
-      ReportNotifier.new,
-    );
+  ReportNotifier.new,
+);

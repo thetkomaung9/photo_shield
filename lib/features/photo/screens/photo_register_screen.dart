@@ -1,12 +1,15 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../../core/theme.dart';
-import '../../../shared/widgets/primary_button.dart';
+import '../../../shared/widgets/photoshield_logo.dart';
 import '../providers/photo_provider.dart';
 
+/// 사진 등록 화면 — 목업과 동일한 점선 업로드 박스 + 단일 네이비 CTA.
 class PhotoRegisterScreen extends ConsumerStatefulWidget {
   const PhotoRegisterScreen({super.key});
 
@@ -18,213 +21,200 @@ class PhotoRegisterScreen extends ConsumerStatefulWidget {
 class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
   final _picker = ImagePicker();
   final List<XFile> _selected = [];
-  _UploadStatus _status = _UploadStatus.idle;
+  bool _uploading = false;
 
-  Future<void> _pick(ImageSource source) async {
-    if (source == ImageSource.gallery) {
-      final files = await _picker.pickMultiImage(limit: 5);
-      setState(
-        () => _selected
-          ..clear()
-          ..addAll(files.take(5)),
-      );
-    } else {
-      final file = await _picker.pickImage(source: source);
-      if (file != null) {
-        setState(
-          () => _selected
-            ..clear()
-            ..add(file),
-        );
-      }
-    }
+  Future<void> _pickFromGallery() async {
+    final files = await _picker.pickMultiImage(limit: 5);
+    if (files.isEmpty) return;
+    setState(() {
+      _selected
+        ..clear()
+        ..addAll(files.take(5));
+    });
   }
 
   Future<void> _upload() async {
-    if (_selected.isEmpty) return;
-    setState(() => _status = _UploadStatus.detecting);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _status = _UploadStatus.extracting);
-
-    final error = await ref
-        .read(photosProvider.notifier)
-        .uploadPhotos(_selected);
-
-    if (!mounted) return;
-    if (error != null) {
-      setState(() => _status = _UploadStatus.idle);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
-    } else {
-      setState(() => _status = _UploadStatus.done);
-      await Future.delayed(const Duration(seconds: 1));
-      if (mounted) context.go('/photos');
+    if (_selected.isEmpty) {
+      // 목업에서는 단순히 갤러리 열기
+      await _pickFromGallery();
+      if (_selected.isEmpty) return;
     }
+    setState(() => _uploading = true);
+    final err = await ref.read(photosProvider.notifier).uploadPhotos(_selected);
+    if (!mounted) return;
+    setState(() => _uploading = false);
+    if (err != null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(err)));
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('사진이 등록되었습니다.')),
+    );
+    context.go('/protect');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('사진 등록')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            if (_status == _UploadStatus.idle) ...[
-              _PhotoPreview(files: _selected),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _pick(ImageSource.gallery),
-                      icon: const Icon(Icons.photo_library_outlined),
-                      label: const Text('갤러리'),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(0, 52),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _pick(ImageSource.camera),
-                      icon: const Icon(Icons.camera_alt_outlined),
-                      label: const Text('카메라'),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(0, 52),
-                      ),
-                    ),
-                  ),
-                ],
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        toolbarHeight: 70,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          onPressed: () => context.go('/protect'),
+        ),
+        title: const PhotoShieldAppBarTitle(
+          textColor: AppTheme.textPrimary,
+          subTextColor: AppTheme.textPrimary,
+          shieldColor: AppTheme.primary,
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          child: Column(
+            children: [
+              const SizedBox(height: 8),
+              const Text(
+                '내 사진 등록',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 28),
+              Expanded(
+                child: GestureDetector(
+                  onTap: _pickFromGallery,
+                  child: _DashedDropzone(files: _selected),
+                ),
               ),
               const SizedBox(height: 16),
               const Text(
-                '최대 5장까지 등록 가능합니다. 정면 사진을 사용해 주세요.',
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                'AI가 당신의 얼굴을 학습하여 SNS를 모니터링합니다.',
                 textAlign: TextAlign.center,
-              ),
-              const Spacer(),
-              PrimaryButton(
-                label: '등록하기',
-                onPressed: _selected.isEmpty ? null : _upload,
-              ),
-            ] else ...[
-              const Spacer(),
-              _UploadProgress(status: _status),
-              const Spacer(),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PhotoPreview extends StatelessWidget {
-  final List<XFile> files;
-  const _PhotoPreview({required this.files});
-
-  @override
-  Widget build(BuildContext context) {
-    if (files.isEmpty) {
-      return Container(
-        height: 200,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF1F5F9),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: const Color(0xFFCBD5E1),
-            style: BorderStyle.solid,
-          ),
-        ),
-        child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.add_photo_alternate_outlined,
-                size: 48,
-                color: AppTheme.textSecondary,
-              ),
-              SizedBox(height: 8),
-              Text(
-                '사진을 선택해 주세요',
-                style: TextStyle(color: AppTheme.textSecondary),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    return SizedBox(
-      height: 200,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: files.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (_, i) => ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.file(
-            File(files[i].path),
-            width: 160,
-            height: 200,
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _UploadProgress extends StatelessWidget {
-  final _UploadStatus status;
-  const _UploadProgress({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    final steps = [
-      (label: '얼굴 감지 중', done: status.index >= 1),
-      (label: '벡터 추출 중', done: status.index >= 2),
-      (label: '등록 완료', done: status == _UploadStatus.done),
-    ];
-
-    return Column(
-      children: [
-        if (status == _UploadStatus.done)
-          const Icon(Icons.check_circle, color: AppTheme.safe, size: 80)
-        else
-          const CircularProgressIndicator(),
-        const SizedBox(height: 24),
-        ...steps.map(
-          (s) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  s.done ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: s.done ? AppTheme.safe : AppTheme.textSecondary,
-                  size: 20,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.textSecondary,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  s.label,
-                  style: TextStyle(
-                    color: s.done
-                        ? AppTheme.textPrimary
-                        : AppTheme.textSecondary,
-                    fontWeight: s.done ? FontWeight.w600 : FontWeight.normal,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: ElevatedButton(
+                  onPressed: _uploading ? null : _upload,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
+                  child: _uploading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : const Text(
+                          '갤러리에서 선택',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
 
-enum _UploadStatus { idle, detecting, extracting, done }
+class _DashedDropzone extends StatelessWidget {
+  final List<XFile> files;
+  const _DashedDropzone({required this.files});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _DashedBorderPainter(),
+      child: Center(
+        child: files.isEmpty
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.add, size: 80, color: Color(0xFFB0B5BD)),
+                  SizedBox(height: 8),
+                  Text(
+                    '사진을 업로드하세요',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF7B7F86),
+                    ),
+                  ),
+                ],
+              )
+            : Padding(
+                padding: const EdgeInsets.all(20),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  shrinkWrap: true,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  children: files
+                      .map((f) => ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              File(f.path),
+                              fit: BoxFit.cover,
+                            ),
+                          ))
+                      .toList(),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+class _DashedBorderPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFC7CCD3)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    final rrect =
+        RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(8));
+    final path = Path()..addRRect(rrect);
+
+    const dash = 10.0;
+    const gap = 6.0;
+    for (final metric in path.computeMetrics()) {
+      double dist = 0;
+      while (dist < metric.length) {
+        canvas.drawPath(
+          metric.extractPath(dist, dist + dash),
+          paint,
+        );
+        dist += dash + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}

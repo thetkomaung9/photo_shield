@@ -1,91 +1,120 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme.dart';
-import '../../auth/providers/auth_provider.dart';
 
-class SettingsScreen extends ConsumerWidget {
+import '../../../core/services/mock_data.dart';
+import '../../../core/theme.dart';
+import '../../../shared/widgets/photoshield_logo.dart';
+
+/// 설정 화면 — 데모 모드용 정적 항목들.
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  bool _push = true;
+  bool _autoScan = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final user = MockData.currentUser;
     return Scaffold(
-      appBar: AppBar(title: const Text('설정')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: AppTheme.primary,
+        toolbarHeight: 64,
+        title: const PhotoShieldAppBarTitle(),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.go('/home'),
+        ),
+      ),
       body: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          const _SectionHeader('계정'),
-          ListTile(
-            leading: const Icon(Icons.person_outline),
-            title: const Text('내 정보'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.cardBg,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: AppTheme.primary,
+                  child: Text(
+                    user.name.isNotEmpty ? user.name[0] : 'U',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        user.email,
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.notifications_outlined),
-            title: const Text('알림 설정'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+          const SizedBox(height: 24),
+          const _SectionTitle(title: '알림'),
+          SwitchListTile(
+            value: _push,
+            onChanged: (v) => setState(() => _push = v),
+            title: const Text('푸시 알림 받기'),
+            activeThumbColor: AppTheme.primary,
           ),
-          const _SectionHeader('앱 정보'),
+          SwitchListTile(
+            value: _autoScan,
+            onChanged: (v) => setState(() => _autoScan = v),
+            title: const Text('자동 정기 검사'),
+            activeThumbColor: AppTheme.primary,
+          ),
+          const SizedBox(height: 24),
+          const _SectionTitle(title: '연결된 플랫폼'),
+          const ListTile(
+            leading: Icon(Icons.camera_alt_outlined,
+                color: AppTheme.instagramPink),
+            title: Text('인스타그램'),
+            subtitle: Text('데모 모드'),
+          ),
+          const ListTile(
+            leading:
+                Icon(Icons.facebook_rounded, color: Color(0xFF1877F2)),
+            title: Text('페이스북'),
+            subtitle: Text('데모 모드'),
+          ),
+          const SizedBox(height: 24),
+          const _SectionTitle(title: '앱 정보'),
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('버전'),
-            trailing: Text(
-              '1.0.0',
-              style: TextStyle(color: AppTheme.textSecondary),
-            ),
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.privacy_tip_outlined),
-            title: const Text('개인정보 처리방침'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
-          ),
-          const _SectionHeader('계정 관리'),
-          ListTile(
-            leading: const Icon(Icons.logout, color: AppTheme.warning),
-            title: const Text(
-              '로그아웃',
-              style: TextStyle(color: AppTheme.warning),
-            ),
-            onTap: () async {
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) context.go('/login');
-            },
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.delete_outline, color: AppTheme.danger),
-            title: const Text(
-              '회원 탈퇴',
-              style: TextStyle(color: AppTheme.danger),
-            ),
-            onTap: () => _confirmWithdraw(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _confirmWithdraw(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('회원 탈퇴'),
-        content: const Text('탈퇴 시 모든 데이터가 즉시 삭제됩니다. 정말 탈퇴하시겠습니까?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: DELETE /users/me
-            },
-            child: const Text('탈퇴', style: TextStyle(color: AppTheme.danger)),
+            trailing: Text('1.0.0 (demo)'),
           ),
         ],
       ),
@@ -93,20 +122,20 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
+class _SectionTitle extends StatelessWidget {
   final String title;
-  const _SectionHeader(this.title);
+  const _SectionTitle({required this.title});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       child: Text(
         title,
         style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
           color: AppTheme.textSecondary,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
         ),
       ),
     );

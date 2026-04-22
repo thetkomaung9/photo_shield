@@ -1,71 +1,70 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants.dart';
-import '../../../core/services/api_service.dart';
 import '../../../core/services/facebook_api_service.dart';
 import '../../../core/services/instagram_api_service.dart';
+import '../../../core/services/mock_data.dart';
 import '../../../shared/models/detection.dart';
 
 /// 통합 detections 프로바이더.
 ///
-/// 1) 자체 백엔드(`/detections`) 호출을 먼저 시도한다.
-/// 2) Meta API(Instagram + Facebook) 가 설정되어 있으면 추가 스캔 결과를 병합한다.
-/// 3) 백엔드도 토큰도 모두 실패하면 Meta 서비스의 데모 데이터를 반환해
-///    UI 가 비어 있지 않게 한다.
+/// 1) 기본은 [MockData.detections] 를 즉시 반환한다.
+/// 2) Meta API 토큰(`META_USER_TOKEN` 등)이 설정되어 있을 때만
+///    Instagram/Facebook 라이브 스캔 결과를 추가로 병합한다.
+///
+/// 자체 백엔드(`https://api.photoshield.kr/v1`) 는 더 이상 호출하지 않는다.
 final detectionsProvider = FutureProvider<List<Detection>>((ref) async {
-  final ig = ref.watch(instagramApiServiceProvider);
-  final fb = ref.watch(facebookApiServiceProvider);
+  // 기본 데모 데이터 — 절대 실패하지 않는다.
+  final base = [...MockData.detections];
 
-  // 1) 자체 백엔드 -----------------------------------------------------------
-  List<Detection> backend = [];
+  // Meta 토큰이 있을 때만 라이브 스캔 시도.
+  final hasMetaToken = MetaEnv.userToken.isNotEmpty;
+  if (!hasMetaToken) {
+    base.sort((a, b) => b.detectedAt.compareTo(a.detectedAt));
+    return base;
+  }
+
   try {
-    final res = await ApiService().dio.get('/detections');
-    final list = res.data['detections'] as List? ?? [];
-    backend = list.map((e) => Detection.fromJson(e)).toList();
-  } on DioException catch (_) {
-    backend = [];
+    final ig = ref.watch(instagramApiServiceProvider);
+    final fb = ref.watch(facebookApiServiceProvider);
+
+    final tags = MetaEnv.monitorTags
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+
+    final igLive = await ig.scanForUnauthorizedUse(
+      hashtags: tags.isEmpty ? const ['내사진'] : tags,
+    );
+    final fbLive =
+        await fb.scanForUnauthorizedUse(suspectPageIds: const []);
+
+    final merged = <String, Detection>{};
+    for (final d in [...base, ...igLive, ...fbLive]) {
+      merged[d.detectionId] = d;
+    }
+    final list = merged.values.toList()
+      ..sort((a, b) => b.detectedAt.compareTo(a.detectedAt));
+    return list;
   } catch (_) {
-    backend = [];
+    // Meta 호출이 어떤 이유로든 실패해도 데모 데이터는 그대로 보여준다.
+    base.sort((a, b) => b.detectedAt.compareTo(a.detectedAt));
+    return base;
   }
-
-  // 2) Meta API 라이브 스캔 ---------------------------------------------------
-  final tags = MetaEnv.monitorTags
-      .split(',')
-      .map((s) => s.trim())
-      .where((s) => s.isNotEmpty)
-      .toList();
-
-  final igLive = await ig.scanForUnauthorizedUse(
-    hashtags: tags.isEmpty ? const ['내사진'] : tags,
-  );
-  // 백엔드에서 의심 페이지를 제공하지 않는 한 facebook 측은 보통 빈 리스트.
-  final fbLive = await fb.scanForUnauthorizedUse(suspectPageIds: const []);
-
-  // 3) 합쳐서 정렬 -----------------------------------------------------------
-  final merged = <String, Detection>{};
-  for (final d in [...backend, ...igLive, ...fbLive]) {
-    merged[d.detectionId] = d;
-  }
-  final list = merged.values.toList()
-    ..sort((a, b) => b.detectedAt.compareTo(a.detectedAt));
-  return list;
 });
 
+/// 단일 탐지 상세 — 캐시된 리스트에서 우선 검색하고, 없으면 데모에서 재탐색.
 final detectionDetailProvider = FutureProvider.family<Detection, String>((
   ref,
   id,
 ) async {
-  // 합쳐진 리스트에서 먼저 탐색 (Meta API 결과 또는 데모 데이터 포함)
   final list = await ref.watch(detectionsProvider.future);
-  final cached =
-      list.where((d) => d.detectionId == id).cast<Detection?>().firstOrNull;
-  if (cached != null) return cached;
-  // 그 다음 자체 백엔드에 시도
-  final res = await ApiService().dio.get('/detections/$id');
-  return Detection.fromJson(res.data);
+  for (final d in list) {
+    if (d.detectionId == id) return d;
+  }
+  final fallback = MockData.findDetection(id);
+  if (fallback != null) return fallback;
+  // 절대 외부 API 를 호출하지 않고, 데모 데이터의 첫 항목을 안전하게 반환한다.
+  return MockData.detections.first;
 });
-
-extension _FirstOrNull<E> on Iterable<E> {
-  E? get firstOrNull => isEmpty ? null : first;
-}
