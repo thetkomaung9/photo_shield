@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/localization/app_locale.dart';
 import '../models/detection.dart';
 import '../../core/theme.dart';
 
@@ -31,7 +32,7 @@ class DetectionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      platformLabel(detection.platform),
+                      AppLocale.platform(context, detection.platform),
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
@@ -67,15 +68,6 @@ class DetectionCard extends StatelessWidget {
   }
 }
 
-/// 다른 위젯에서도 동일 매핑을 재사용하기 위해 top-level 로 노출.
-String platformLabel(String platform) => switch (platform) {
-      'naver_blog' => '네이버 블로그',
-      'kakao_story' => '카카오스토리',
-      'instagram' => '인스타그램',
-      'facebook' => '페이스북',
-      _ => platform,
-    };
-
 class _PlatformVisual {
   final Color background;
   final Color foreground;
@@ -90,8 +82,7 @@ _PlatformVisual _visualFor(String platform) => switch (platform) {
         const _PlatformVisual(Color(0xFFFFE812), Colors.black, 'K'),
       'instagram' =>
         const _PlatformVisual(Color(0xFFE1306C), Colors.white, 'IG'),
-      'facebook' =>
-        const _PlatformVisual(Color(0xFF1877F2), Colors.white, 'F'),
+      'facebook' => const _PlatformVisual(Color(0xFF1877F2), Colors.white, 'F'),
       _ => const _PlatformVisual(Color(0xFF94A3B8), Colors.white, '?'),
     };
 
@@ -137,7 +128,7 @@ class _SimilarityBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        '유사도 $pct%',
+        '${context.tr('similarity')} $pct%',
         style: const TextStyle(
           color: AppTheme.danger,
           fontSize: 11,
@@ -167,7 +158,7 @@ class _StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        status.label,
+        AppLocale.detectionStatus(context, status),
         style: TextStyle(
           color: color,
           fontSize: 11,

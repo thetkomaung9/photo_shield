@@ -45,7 +45,9 @@ class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
     if (!mounted) return;
     setState(() => _uploading = false);
     if (err != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocale.maybeTranslateRaw(context, err))),
+      );
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
