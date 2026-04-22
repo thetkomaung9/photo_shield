@@ -23,7 +23,7 @@ class LocaleNotifier extends StateNotifier<Locale> {
     final prefs = await SharedPreferences.getInstance();
     final savedCode = prefs.getString(_localePreferenceKey);
     if (savedCode == 'en' || savedCode == 'ko') {
-      state = Locale(savedCode);
+      state = Locale(savedCode!);
     }
   }
 }
@@ -34,7 +34,7 @@ class AppLocale {
     Locale('ko'),
   ];
 
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
+  static final List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
