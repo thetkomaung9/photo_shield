@@ -122,8 +122,7 @@ class AppLocale {
       'photoStatusLearning': 'Training',
       'photoRegistered': 'Photo registered.',
       'photoRegisterTitle': 'Register My Photo',
-      'photoRegisterDesc':
-          'AI learns your face and monitors social platforms.',
+      'photoRegisterDesc': 'AI learns your face and monitors social platforms.',
       'selectFromGallery': 'Choose from gallery',
       'uploadPhotoPrompt': 'Upload your photo',
       'notificationEmpty': 'No activity records yet.',
@@ -153,7 +152,8 @@ class AppLocale {
       'notifDemo1': 'Potential misuse found on Instagram. (SooYoung_Love)',
       'notifDemo2':
           'Today\'s scheduled scan is complete. No new threats were found.',
-      'notifDemo3': 'Naver Blog misuse report has been submitted and is processing.',
+      'notifDemo3':
+          'Naver Blog misuse report has been submitted and is processing.',
     },
     'ko': {
       'appTitle': '포토쉴드 코리아',
