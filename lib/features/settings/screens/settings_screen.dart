@@ -87,7 +87,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 24),
           _SectionTitle(title: context.tr('language')),
           DropdownButtonFormField<String>(
-            value: locale.languageCode,
+            initialValue: locale.languageCode,
             decoration: InputDecoration(
               filled: true,
               fillColor: AppTheme.cardBg,
