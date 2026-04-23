@@ -19,15 +19,20 @@ void main() async {
 
   // Initialize Firebase with error handling
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    final firebaseOptions = DefaultFirebaseOptions.currentPlatform;
+    if (firebaseOptions != null) {
+      await Firebase.initializeApp(
+        options: firebaseOptions,
+      );
 
-    // Set up background message handler
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+      // Set up background message handler
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-    // Initialize push notification service
-    await PushNotificationService().initialize();
+      // Initialize push notification service
+      await PushNotificationService().initialize();
+    } else {
+      debugPrint('Firebase not configured for this platform');
+    }
   } catch (e) {
     debugPrint('Firebase initialization failed: $e');
     // Continue anyway - Firebase is not critical for app functionality
