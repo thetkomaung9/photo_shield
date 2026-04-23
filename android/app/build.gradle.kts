@@ -2,10 +2,11 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "com.example.photo_shield"
+    namespace = "com.tkm.photoshield"
     compileSdk = flutter.compileSdkVersion
     
     // 1. UPDATED NDK: Bumped to 28.2.13676358 as required by the jni plugin
@@ -28,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.photo_shield"
+        applicationId = "com.tkm.photoshield"
         minSdk = 24 
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
