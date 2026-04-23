@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "785893277995",
+    "project_id": "photo-shield",
+    "storage_bucket": "photo-shield.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:785893277995:android:e2edfc91a9e3cbfe9fc56e",
+        "android_client_info": {
+          "package_name": "com.tkm.photoshield"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-SXJVc04abodp8zrIUCVMm5MZFgg9zhw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
