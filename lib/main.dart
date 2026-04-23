@@ -10,7 +10,12 @@ import 'firebase_options.dart';
 /// Background message handler for Firebase Messaging
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  final firebaseOptions = DefaultFirebaseOptions.currentPlatform;
+  if (firebaseOptions == null) {
+    return;
+  }
+
+  await Firebase.initializeApp(options: firebaseOptions);
   await PushNotificationService().handleBackgroundMessage(message);
 }
 
