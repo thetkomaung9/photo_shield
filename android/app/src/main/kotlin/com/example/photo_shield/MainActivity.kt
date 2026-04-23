@@ -1,4 +1,4 @@
-package com.example.photo_shield
+package com.tkm.photoshield
 
 import io.flutter.embedding.android.FlutterActivity
 
