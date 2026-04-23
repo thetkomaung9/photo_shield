@@ -45,50 +45,58 @@ class PushNotificationService {
 
   /// Request notification permissions
   Future<void> _requestPermission() async {
-    final settings = await _firebaseMessaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
+    try {
+      final settings = await _firebaseMessaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      debugLog('User granted notification permission');
-    } else if (settings.authorizationStatus ==
-        AuthorizationStatus.provisional) {
-      debugLog('User granted provisional notification permission');
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        debugLog('User granted notification permission');
+      } else if (settings.authorizationStatus ==
+          AuthorizationStatus.provisional) {
+        debugLog('User granted provisional notification permission');
+      }
+    } catch (e) {
+      debugLog('Error requesting notification permission: $e');
     }
   }
 
   /// Initialize local notifications for both Android and iOS
   Future<void> _initLocalNotifications() async {
-    const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    try {
+      const AndroidInitializationSettings androidSettings =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const DarwinInitializationSettings iosSettings =
-        DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
-
-    const InitializationSettings initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
-
-    await _localNotifications.initialize(initSettings);
-
-    // Handle notification taps on iOS
-    if (Platform.isIOS) {
-      await _firebaseMessaging.setForegroundNotificationPresentationOptions(
-        alert: true,
-        badge: true,
-        sound: true,
+      const DarwinInitializationSettings iosSettings =
+          DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
       );
+
+      const InitializationSettings initSettings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
+
+      await _localNotifications.initialize(initSettings);
+
+      // Handle notification taps on iOS
+      if (Platform.isIOS) {
+        await _firebaseMessaging.setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+      }
+    } catch (e) {
+      debugLog('Error initializing local notifications: $e');
     }
   }
 
