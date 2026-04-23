@@ -18,23 +18,28 @@ class PushNotificationService {
 
   /// Initialize Firebase Messaging and local notifications
   Future<void> initialize() async {
-    _firebaseMessaging = FirebaseMessaging.instance;
-    _localNotifications = FlutterLocalNotificationsPlugin();
+    try {
+      _firebaseMessaging = FirebaseMessaging.instance;
+      _localNotifications = FlutterLocalNotificationsPlugin();
 
-    // Request notification permission
-    await _requestPermission();
+      // Request notification permission
+      await _requestPermission();
 
-    // Initialize local notifications
-    await _initLocalNotifications();
+      // Initialize local notifications
+      await _initLocalNotifications();
 
-    // Setup message handlers
-    _setupMessageHandlers();
+      // Setup message handlers
+      _setupMessageHandlers();
 
-    // Get FCM token
-    final token = await getToken();
-    if (token != null) {
-      // Save token to server if needed
-      await _saveTokenToServer(token);
+      // Get FCM token
+      final token = await getToken();
+      if (token != null) {
+        // Save token to server if needed
+        await _saveTokenToServer(token);
+      }
+    } catch (e) {
+      debugLog('Error initializing push notifications: $e');
+      // Continue without push notifications
     }
   }
 

@@ -17,16 +17,21 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Initialize Firebase with error handling
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  // Set up background message handler
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    // Set up background message handler
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  // Initialize push notification service
-  await PushNotificationService().initialize();
+    // Initialize push notification service
+    await PushNotificationService().initialize();
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    // Continue anyway - Firebase is not critical for app functionality
+  }
 
   runApp(const ProviderScope(child: PhotoShieldApp()));
 }
