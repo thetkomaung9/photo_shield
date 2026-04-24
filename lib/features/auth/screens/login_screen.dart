@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../core/localization/app_locale.dart';
+import '../../../core/services/social_auth_service.dart';
+import '../../../core/services/unified_monitoring_service.dart';
 import '../../../core/theme.dart';
 import '../../../shared/models/social_platform.dart';
 import '../../../shared/widgets/primary_button.dart';
@@ -55,7 +58,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         : context.tr('socialLoginLiveConnected');
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
-    context.go('/home');
+    ref.invalidate(socialConnectionsProvider);
+    ref.invalidate(monitoringSnapshotProvider);
+    context.go('/photos/register');
   }
 
   @override
