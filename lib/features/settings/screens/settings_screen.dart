@@ -6,6 +6,7 @@ import '../../../core/localization/app_locale.dart';
 import '../../../core/services/mock_data.dart';
 import '../../../core/services/social_auth_service.dart';
 import '../../../core/theme.dart';
+import '../../../shared/models/social_platform.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
 
 /// 설정 화면 — 데모 모드용 정적 항목들.

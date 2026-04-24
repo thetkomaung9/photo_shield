@@ -233,7 +233,7 @@ class _PlatformCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _PlatformIcon(id: platform.id),
+          _PlatformIcon(id: platform.platform.platformId),
           const SizedBox(height: 10),
           Text(
             AppLocale.platform(context, platform.platform.platformId),
