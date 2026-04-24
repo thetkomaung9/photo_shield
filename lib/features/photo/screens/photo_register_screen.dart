@@ -6,8 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/localization/app_locale.dart';
+import '../../../core/services/push_notification_service.dart';
 import '../../../core/theme.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
+import '../providers/liveness_provider.dart';
 import '../providers/photo_provider.dart';
 
 /// 사진 등록 화면 — 목업과 동일한 점선 업로드 박스 + 단일 네이비 CTA.
@@ -24,6 +26,15 @@ class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
   final List<XFile> _selected = [];
   bool _uploading = false;
 
+  Future<void> _runLivenessCheck() async {
+    final error = await ref.read(livenessProvider.notifier).runCheck(_picker);
+    if (!mounted || error == null) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocale.maybeTranslateRaw(context, error))),
+    );
+  }
+
   Future<void> _pickFromGallery() async {
     final files = await _picker.pickMultiImage(limit: 5);
     if (files.isEmpty) return;
@@ -35,6 +46,13 @@ class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
   }
 
   Future<void> _upload() async {
+    final liveness = ref.read(livenessProvider);
+    if (!liveness.isVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.tr('liveCheckRequired'))),
+      );
+      return;
+    }
     if (_selected.isEmpty) {
       // 목업에서는 단순히 갤러리 열기
       await _pickFromGallery();
@@ -53,11 +71,19 @@ class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(context.tr('photoRegistered'))),
     );
+    await ref.read(pushNotificationServiceProvider).showLocalAlert(
+      title: context.tr('monitoringArmedTitle'),
+      body: context.tr('monitoringArmedBody'),
+      data: const {'type': 'onboarding_complete'},
+    );
+    ref.read(livenessProvider.notifier).reset();
     context.go('/protect');
   }
 
   @override
   Widget build(BuildContext context) {
+    final liveness = ref.watch(livenessProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -90,6 +116,14 @@ class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
                 ),
               ),
               const SizedBox(height: 28),
+              _LivenessCard(
+                challengeText: context.tr(liveness.challengeKey),
+                isVerified: liveness.isVerified,
+                verifiedAt: liveness.verifiedAt,
+                isChecking: liveness.isChecking,
+                onPressed: _runLivenessCheck,
+              ),
+              const SizedBox(height: 20),
               Expanded(
                 child: GestureDetector(
                   onTap: _pickFromGallery,
@@ -139,6 +173,88 @@ class _PhotoRegisterScreenState extends ConsumerState<PhotoRegisterScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _LivenessCard extends StatelessWidget {
+  const _LivenessCard({
+    required this.challengeText,
+    required this.isVerified,
+    required this.verifiedAt,
+    required this.isChecking,
+    required this.onPressed,
+  });
+
+  final String challengeText;
+  final bool isVerified;
+  final DateTime? verifiedAt;
+  final bool isChecking;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4F8FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFD3E1FF)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.verified_user_outlined, color: AppTheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  context.tr('liveCheckTitle'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+              ),
+              Text(
+                isVerified
+                    ? context.tr('livenessVerified')
+                    : context.tr('livenessPending'),
+                style: TextStyle(
+                  color: isVerified ? AppTheme.safe : AppTheme.textSecondary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            challengeText,
+            style: const TextStyle(color: AppTheme.textSecondary),
+          ),
+          if (verifiedAt != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              '${context.tr('liveCheckVerifiedAt')}: ${AppLocale.relativeTime(context, verifiedAt!)}',
+              style:
+                  const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+            ),
+          ],
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: isChecking ? null : onPressed,
+            icon: const Icon(Icons.camera_front_outlined),
+            label: Text(context.tr('startLiveCheck')),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppTheme.primary,
+              side: const BorderSide(color: AppTheme.primary),
+            ),
+          ),
+        ],
       ),
     );
   }

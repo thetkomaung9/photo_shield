@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../../core/theme.dart';
+import '../../../shared/models/social_platform.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../providers/auth_provider.dart';
 
@@ -42,6 +43,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } else {
       context.go('/home');
     }
+  }
+
+  Future<void> _loginWithSocial(SocialPlatform platform) async {
+    final connection =
+        await ref.read(authProvider.notifier).loginWithSocial(platform);
+    if (!mounted || connection == null) return;
+
+    final message = connection.requiresConsoleSetup
+        ? context.tr('socialLoginDemoConnected')
+        : context.tr('socialLoginLiveConnected');
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+    context.go('/home');
   }
 
   @override
@@ -131,26 +145,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  onPressed: () {}, // TODO: 카카오 로그인
-                  icon: const Text(
-                    'K',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        context.tr('socialLoginDivider'),
+                        style: const TextStyle(color: AppTheme.textSecondary),
+                      ),
                     ),
-                  ),
-                  label: Text(
-                    context.tr('loginWithKakao'),
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 52),
-                    backgroundColor: const Color(0xFFFFE812),
-                    side: BorderSide.none,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ...SocialPlatform.values.map(
+                  (platform) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _SocialLoginButton(
+                      platform: platform,
+                      label: context.tr(platform.loginLabelKey),
+                      isLoading: isLoading,
+                      onPressed: () => _loginWithSocial(platform),
                     ),
                   ),
                 ),
@@ -164,6 +181,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SocialLoginButton extends StatelessWidget {
+  const _SocialLoginButton({
+    required this.platform,
+    required this.label,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  final SocialPlatform platform;
+  final String label;
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final foregroundColor = switch (platform) {
+      SocialPlatform.kakao => const Color(0xFF3C1E1E),
+      _ => Colors.white,
+    };
+    final backgroundColor = switch (platform) {
+      SocialPlatform.facebook => const Color(0xFF1877F2),
+      SocialPlatform.instagram => const Color(0xFFDD2A7B),
+      SocialPlatform.kakao => const Color(0xFFFFE812),
+      SocialPlatform.naver => const Color(0xFF03C75A),
+    };
+    final icon = switch (platform) {
+      SocialPlatform.facebook => Icons.facebook_rounded,
+      SocialPlatform.instagram => Icons.camera_alt_rounded,
+      SocialPlatform.kakao => Icons.chat_bubble_rounded,
+      SocialPlatform.naver => Icons.language_rounded,
+    };
+
+    return ElevatedButton.icon(
+      onPressed: isLoading ? null : onPressed,
+      icon: Icon(icon, color: foregroundColor),
+      label: Text(
+        label,
+        style: TextStyle(color: foregroundColor, fontWeight: FontWeight.w700),
+      ),
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 52),
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );

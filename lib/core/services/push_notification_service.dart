@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -165,6 +166,39 @@ class PushNotificationService {
     );
   }
 
+  Future<void> showLocalAlert({
+    required String title,
+    required String body,
+    Map<String, dynamic> data = const {},
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'photo_shield_notifications',
+      'PhotoShield Notifications',
+      channelDescription: 'Notifications from PhotoShield',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _localNotifications.show(
+      title.hashCode ^ body.hashCode,
+      title,
+      body,
+      details,
+      payload: data.isEmpty ? null : jsonEncode(data),
+    );
+  }
+
   /// Handle notification tap
   void _handleMessageTap(RemoteMessage message) {
     // TODO: Implement navigation based on message data
@@ -215,11 +249,6 @@ class PushNotificationService {
 void debugLog(String message) {
   // ignore: avoid_print
   print('[PushNotificationService] $message');
-}
-
-/// JSON encode helper for payload
-String jsonEncode(Map<String, dynamic> data) {
-  return data.toString();
 }
 
 /// Provider

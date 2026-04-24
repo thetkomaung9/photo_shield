@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/mock_data.dart';
+import '../../../core/services/unified_monitoring_service.dart';
 import '../../../shared/models/notification_item.dart';
 
 /// 알림 목록 프로바이더.
@@ -13,7 +14,14 @@ class NotificationsNotifier extends AsyncNotifier<List<NotificationItem>> {
   @override
   Future<List<NotificationItem>> build() async {
     await Future.delayed(const Duration(milliseconds: 200));
-    return MockData.notifications.map((n) {
+    final snapshot = await ref.watch(monitoringSnapshotProvider.future);
+    final merged = <String, NotificationItem>{
+      for (final item in MockData.notifications) item.notificationId: item,
+      for (final item in snapshot.generatedNotifications)
+        item.notificationId: item,
+    };
+
+    return merged.values.map((n) {
       if (_readIds.contains(n.notificationId)) {
         return NotificationItem(
           notificationId: n.notificationId,
@@ -25,7 +33,8 @@ class NotificationsNotifier extends AsyncNotifier<List<NotificationItem>> {
         );
       }
       return n;
-    }).toList();
+    }).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
   Future<void> markRead(String id) async {

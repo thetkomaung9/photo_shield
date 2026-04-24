@@ -1,9 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/constants.dart';
-import '../../../core/services/facebook_api_service.dart';
-import '../../../core/services/instagram_api_service.dart';
 import '../../../core/services/mock_data.dart';
+import '../../../core/services/unified_monitoring_service.dart';
 import '../../../shared/models/detection.dart';
 
 /// 통합 detections 프로바이더.
@@ -14,42 +12,12 @@ import '../../../shared/models/detection.dart';
 ///
 /// 자체 백엔드(`https://api.photoshield.kr/v1`) 는 더 이상 호출하지 않는다.
 final detectionsProvider = FutureProvider<List<Detection>>((ref) async {
-  // 기본 데모 데이터 — 절대 실패하지 않는다.
-  final base = [...MockData.detections];
-
-  // Meta 토큰이 있을 때만 라이브 스캔 시도.
-  final hasMetaToken = MetaEnv.userToken.isNotEmpty;
-  if (!hasMetaToken) {
-    base.sort((a, b) => b.detectedAt.compareTo(a.detectedAt));
-    return base;
-  }
-
   try {
-    final ig = ref.watch(instagramApiServiceProvider);
-    final fb = ref.watch(facebookApiServiceProvider);
-
-    final tags = MetaEnv.monitorTags
-        .split(',')
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
-
-    final igLive = await ig.scanForUnauthorizedUse(
-      hashtags: tags.isEmpty ? const ['내사진'] : tags,
-    );
-    final fbLive =
-        await fb.scanForUnauthorizedUse(suspectPageIds: const []);
-
-    final merged = <String, Detection>{};
-    for (final d in [...base, ...igLive, ...fbLive]) {
-      merged[d.detectionId] = d;
-    }
-    final list = merged.values.toList()
-      ..sort((a, b) => b.detectedAt.compareTo(a.detectedAt));
-    return list;
+    final snapshot = await ref.watch(monitoringSnapshotProvider.future);
+    return snapshot.detections;
   } catch (_) {
-    // Meta 호출이 어떤 이유로든 실패해도 데모 데이터는 그대로 보여준다.
-    base.sort((a, b) => b.detectedAt.compareTo(a.detectedAt));
+    final base = [...MockData.detections]
+      ..sort((a, b) => b.detectedAt.compareTo(a.detectedAt));
     return base;
   }
 });

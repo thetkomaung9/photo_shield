@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_locale.dart';
 import '../../../core/services/mock_data.dart';
+import '../../../core/services/social_auth_service.dart';
 import '../../../core/theme.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
 
@@ -22,6 +23,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final user = MockData.currentUser;
+    final connections = ref.watch(socialConnectionsProvider);
     final locale = ref.watch(localeProvider);
 
     return Scaffold(
@@ -127,16 +129,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 24),
           _SectionTitle(title: context.tr('connectedPlatforms')),
-          ListTile(
-            leading:
-                Icon(Icons.camera_alt_outlined, color: AppTheme.instagramPink),
-            title: Text(context.tr('platformInstagram')),
-            subtitle: Text(context.tr('demoMode')),
-          ),
-          ListTile(
-            leading: Icon(Icons.facebook_rounded, color: Color(0xFF1877F2)),
-            title: Text(context.tr('platformFacebook')),
-            subtitle: Text(context.tr('demoMode')),
+          ...connections.when(
+            data: (items) => items.map((connection) {
+              final subtitle = !connection.isConnected
+                  ? context.tr('consoleSetupNeeded')
+                  : (connection.isDemo
+                      ? context.tr('connectedDemo')
+                      : context.tr('connectedLive'));
+              return ListTile(
+                leading:
+                    _SettingsPlatformIcon(id: connection.platform.platformId),
+                title: Text(AppLocale.platform(
+                    context, connection.platform.platformId)),
+                subtitle: Text(subtitle),
+                trailing: connection.accountLabel == null
+                    ? null
+                    : Text(
+                        connection.accountLabel!,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+              );
+            }).toList(),
+            loading: () => [const LinearProgressIndicator()],
+            error: (_, __) => [
+              ListTile(
+                title: Text(context.tr('connectedPlatforms')),
+                subtitle: Text(context.tr('consoleSetupNeeded')),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
           _SectionTitle(title: context.tr('appInfo')),
@@ -148,6 +168,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
+  }
+}
+
+class _SettingsPlatformIcon extends StatelessWidget {
+  const _SettingsPlatformIcon({required this.id});
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (id) {
+      case 'instagram':
+        return Icon(Icons.camera_alt_outlined, color: AppTheme.instagramPink);
+      case 'facebook':
+        return const Icon(Icons.facebook_rounded, color: Color(0xFF1877F2));
+      case 'kakao_story':
+        return const Icon(Icons.chat_bubble_rounded,
+            color: AppTheme.kakaoYellow);
+      case 'naver':
+        return const Icon(Icons.language_rounded, color: AppTheme.naverGreen);
+      default:
+        return const Icon(Icons.public);
+    }
   }
 }
 

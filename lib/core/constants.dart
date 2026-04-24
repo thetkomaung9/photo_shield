@@ -30,6 +30,18 @@ class StorageKeys {
   static const String metaUserToken = 'meta_user_token';
   static const String metaAppToken = 'meta_app_token';
   static const String metaIgUserId = 'meta_ig_user_id';
+  static const String kakaoAccessToken = 'kakao_access_token';
+  static const String naverAccessToken = 'naver_access_token';
+  static const String livenessVerifiedAt = 'liveness_verified_at';
+
+  static String socialConnected(String providerId) =>
+      'social_connected_$providerId';
+
+  static String socialAccountLabel(String providerId) =>
+      'social_account_label_$providerId';
+
+  static String socialConnectedAt(String providerId) =>
+      'social_connected_at_$providerId';
 }
 
 /// `--dart-define` 으로 컴파일 타임에 주입되는 환경 변수.
@@ -53,6 +65,53 @@ class MetaEnv {
   /// 예: `--dart-define=META_MONITOR_TAGS=내사진,프로필도용`
   static const String monitorTags = String.fromEnvironment(
     'META_MONITOR_TAGS',
+    defaultValue: '',
+  );
+}
+
+class InstagramEnv {
+  static const String clientId = String.fromEnvironment('INSTAGRAM_CLIENT_ID');
+  static const String redirectUri = String.fromEnvironment(
+    'INSTAGRAM_REDIRECT_URI',
+  );
+
+  static bool get isConfigured => clientId.isNotEmpty && redirectUri.isNotEmpty;
+}
+
+class KakaoEnv {
+  static const String nativeAppKey = String.fromEnvironment(
+    'KAKAO_NATIVE_APP_KEY',
+  );
+  static const String redirectUri = String.fromEnvironment(
+    'KAKAO_REDIRECT_URI',
+  );
+
+  static bool get isConfigured => nativeAppKey.isNotEmpty;
+}
+
+class NaverEnv {
+  static const String clientId = String.fromEnvironment('NAVER_CLIENT_ID');
+  static const String clientSecret = String.fromEnvironment(
+    'NAVER_CLIENT_SECRET',
+  );
+  static const String serviceName = String.fromEnvironment(
+    'NAVER_SERVICE_NAME',
+  );
+  static const String redirectUri = String.fromEnvironment(
+    'NAVER_REDIRECT_URI',
+  );
+
+  static bool get isConfigured =>
+      clientId.isNotEmpty && clientSecret.isNotEmpty && redirectUri.isNotEmpty;
+}
+
+class MonitoringEnv {
+  static const String keywords = String.fromEnvironment(
+    'MONITOR_KEYWORDS',
+    defaultValue: '내사진,프로필도용,무단도용',
+  );
+  static const String facebookSuspectPages = String.fromEnvironment(
+    'FACEBOOK_SUSPECT_PAGE_IDS',
     defaultValue: '',
   );
 }

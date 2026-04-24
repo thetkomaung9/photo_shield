@@ -79,6 +79,14 @@ class AppLocale {
       'testEmailLabel': 'Email',
       'testPasswordLabel': 'Password',
       'loginWithKakao': 'Continue with Kakao',
+      'loginWithFacebook': 'Continue with Facebook',
+      'loginWithInstagram': 'Continue with Instagram',
+      'loginWithNaver': 'Continue with Naver',
+      'socialLoginDivider': 'or connect a social provider',
+      'socialLoginDemoConnected':
+          'Connected in demo mode. Finish console setup for live provider login.',
+      'socialLoginLiveConnected':
+          'Social provider connected. Live monitoring is ready.',
       'noAccountSignup': 'No account? Sign up',
       'skip': 'Skip',
       'next': 'Next',
@@ -123,8 +131,24 @@ class AppLocale {
       'photoRegistered': 'Photo registered.',
       'photoRegisterTitle': 'Register My Photo',
       'photoRegisterDesc': 'AI learns your face and monitors social platforms.',
+      'liveCheckTitle': 'Live camera liveness check',
+      'liveCheckRequired':
+          'Complete the live camera check before registering photos.',
+      'liveCheckVerifiedAt': 'Last verified',
+      'startLiveCheck': 'Run live camera check',
+      'livenessVerified': 'Verified',
+      'livenessPending': 'Pending',
+      'livenessPromptBlink':
+          'Blink twice and capture a fresh selfie with the front camera.',
+      'livenessPromptTurnLeft':
+          'Turn slightly left and capture a fresh selfie with the front camera.',
+      'livenessPromptSmile':
+          'Smile naturally and capture a fresh selfie with the front camera.',
       'selectFromGallery': 'Choose from gallery',
       'uploadPhotoPrompt': 'Upload your photo',
+      'monitoringArmedTitle': 'PhotoShield monitoring is active',
+      'monitoringArmedBody':
+          'Push alerts are armed for Facebook, Instagram, Kakao, and Naver checks.',
       'notificationEmpty': 'No activity records yet.',
       'detectionNoResults': 'No detections found.',
       'previousDetections': 'Previous detections',
@@ -156,6 +180,10 @@ class AppLocale {
           'Today\'s scheduled scan is complete. No new threats were found.',
       'notifDemo3':
           'Naver Blog misuse report has been submitted and is processing.',
+      'connectedLive': 'Connected (live)',
+      'connectedDemo': 'Connected (demo)',
+      'consoleSetupNeeded': 'Console setup needed',
+      'platformAlerts': '{count} alerts',
     },
     'ko': {
       'appTitle': '포토쉴드 코리아',
@@ -193,6 +221,12 @@ class AppLocale {
       'testEmailLabel': '이메일',
       'testPasswordLabel': '비밀번호',
       'loginWithKakao': '카카오로 로그인',
+      'loginWithFacebook': '페이스북으로 로그인',
+      'loginWithInstagram': '인스타그램으로 로그인',
+      'loginWithNaver': '네이버로 로그인',
+      'socialLoginDivider': '또는 소셜 계정을 연결하세요',
+      'socialLoginDemoConnected': '데모 모드로 연결되었습니다. 라이브 연동을 위해 콘솔 설정을 완료해 주세요.',
+      'socialLoginLiveConnected': '소셜 계정 연결이 완료되었습니다. 라이브 모니터링을 사용할 수 있습니다.',
       'noAccountSignup': '계정이 없으신가요? 회원가입',
       'skip': '건너뛰기',
       'next': '다음',
@@ -231,8 +265,19 @@ class AppLocale {
       'photoRegistered': '사진이 등록되었습니다.',
       'photoRegisterTitle': '내 사진 등록',
       'photoRegisterDesc': 'AI가 당신의 얼굴을 학습하여 SNS를 모니터링합니다.',
+      'liveCheckTitle': '실시간 카메라 생존 확인',
+      'liveCheckRequired': '사진 등록 전에 실시간 카메라 확인을 완료해 주세요.',
+      'liveCheckVerifiedAt': '최근 확인',
+      'startLiveCheck': '실시간 카메라 확인 시작',
+      'livenessVerified': '확인됨',
+      'livenessPending': '미완료',
+      'livenessPromptBlink': '눈을 두 번 깜빡인 뒤 전면 카메라로 최신 셀피를 촬영하세요.',
+      'livenessPromptTurnLeft': '얼굴을 살짝 왼쪽으로 돌린 뒤 전면 카메라로 최신 셀피를 촬영하세요.',
+      'livenessPromptSmile': '자연스럽게 미소 지은 뒤 전면 카메라로 최신 셀피를 촬영하세요.',
       'selectFromGallery': '갤러리에서 선택',
       'uploadPhotoPrompt': '사진을 업로드하세요',
+      'monitoringArmedTitle': '포토쉴드 모니터링이 활성화되었습니다',
+      'monitoringArmedBody': '페이스북, 인스타그램, 카카오, 네이버 감시에 대한 푸시 알림이 설정되었습니다.',
       'notificationEmpty': '아직 활동 기록이 없습니다.',
       'detectionNoResults': '탐지된 결과가 없습니다.',
       'previousDetections': '이전 탐지 기록',
@@ -262,6 +307,10 @@ class AppLocale {
       'notifDemo1': '인스타그램에서 무단 도용 의심 사례가 발견되었습니다. (SooYoung_Love)',
       'notifDemo2': '오늘의 정기 검사가 완료되었습니다. 새로운 위협은 발견되지 않았습니다.',
       'notifDemo3': '네이버 블로그 도용 신고가 접수되어 처리 중입니다.',
+      'connectedLive': '라이브 연결됨',
+      'connectedDemo': '데모 연결됨',
+      'consoleSetupNeeded': '콘솔 설정 필요',
+      'platformAlerts': '{count}건 감지',
     },
   };
 
@@ -290,6 +339,7 @@ class AppLocale {
   static String platform(BuildContext context, String id) => switch (id) {
         'instagram' => t(context, 'platformInstagram'),
         'facebook' => t(context, 'platformFacebook'),
+        'kakao' => t(context, 'platformKakaoStory'),
         'naver_blog' => t(context, 'platformNaverBlog'),
         'kakao_story' => t(context, 'platformKakaoStory'),
         'naver' => t(context, 'platformNaver'),
@@ -339,6 +389,9 @@ class AppLocale {
     if (raw == '사진 등록 한도(5장)를 초과했습니다.' ||
         raw == 'Photo upload limit (5) exceeded.') {
       return t(context, 'photoLimitExceeded');
+    }
+    if (raw == 'Live camera check was cancelled.') {
+      return t(context, 'liveCheckRequired');
     }
     return raw;
   }

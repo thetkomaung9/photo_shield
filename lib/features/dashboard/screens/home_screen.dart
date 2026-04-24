@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_locale.dart';
 import '../../../core/services/mock_data.dart';
+import '../../../core/services/unified_monitoring_service.dart';
 import '../../../core/theme.dart';
+import '../../../shared/models/social_platform.dart';
 import '../../../shared/widgets/photoshield_logo.dart';
 
 /// 메인 대시보드 화면 — 데모 목업과 동일한 레이아웃.
@@ -14,7 +16,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = MockData.currentUser;
-    final lastScan = MockData.lastScanAt;
+    final snapshot = ref.watch(monitoringSnapshotProvider);
+    final lastScan = snapshot.valueOrNull?.generatedAt ?? MockData.lastScanAt;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -64,7 +67,7 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const _PlatformRow(),
+          _PlatformRow(platforms: snapshot.valueOrNull?.platforms ?? const []),
           const SizedBox(height: 16),
         ],
       ),
@@ -186,11 +189,13 @@ class _RecentScanCard extends StatelessWidget {
 }
 
 class _PlatformRow extends StatelessWidget {
-  const _PlatformRow();
+  final List<MonitoringPlatformSummary> platforms;
+
+  const _PlatformRow({required this.platforms});
 
   @override
   Widget build(BuildContext context) {
-    final items = MockData.platforms;
+    final items = platforms;
     return Row(
       children: List.generate(items.length, (i) {
         final p = items[i];
@@ -208,7 +213,7 @@ class _PlatformRow extends StatelessWidget {
 }
 
 class _PlatformCard extends StatelessWidget {
-  final PlatformStatus platform;
+  final MonitoringPlatformSummary platform;
   const _PlatformCard({required this.platform});
 
   @override
@@ -231,7 +236,7 @@ class _PlatformCard extends StatelessWidget {
           _PlatformIcon(id: platform.id),
           const SizedBox(height: 10),
           Text(
-            AppLocale.platform(context, platform.id),
+            AppLocale.platform(context, platform.platform.platformId),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
@@ -249,7 +254,12 @@ class _PlatformCard extends StatelessWidget {
               ),
             ),
             child: Text(
-              platform.isSafe ? context.tr('statusSafe') : platform.status,
+              platform.isSafe
+                  ? context.tr('statusSafe')
+                  : context.trf(
+                      'platformAlerts',
+                      {'count': platform.alertCount.toString()},
+                    ),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
