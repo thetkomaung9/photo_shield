@@ -26,9 +26,8 @@ class ApiConstants {
     }
 
     final base = Uri.parse(baseUrl);
-    final relative = pathOrUrl.startsWith('/')
-        ? pathOrUrl.substring(1)
-        : pathOrUrl;
+    final relative =
+        pathOrUrl.startsWith('/') ? pathOrUrl.substring(1) : pathOrUrl;
     return base.resolve(relative).toString();
   }
 }

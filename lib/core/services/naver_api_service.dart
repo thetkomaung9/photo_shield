@@ -88,8 +88,8 @@ class NaverApiService {
         foundUrl: map['foundUrl']?.toString() ??
             map['url']?.toString() ??
             'https://blog.naver.com/',
-        screenshotUrl: map['screenshotUrl']?.toString() ??
-            map['imageUrl']?.toString(),
+        screenshotUrl:
+            map['screenshotUrl']?.toString() ?? map['imageUrl']?.toString(),
         similarity: (map['similarity'] as num?)?.toDouble() ?? 0.0,
         originalPhotoId: map['originalPhotoId']?.toString() ??
             (originalPhotoIds.isNotEmpty ? originalPhotoIds.first : null),

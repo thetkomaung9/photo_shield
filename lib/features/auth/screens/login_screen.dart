@@ -54,7 +54,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
     if (connection == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Social login failed. Check provider setup.')),
+        const SnackBar(
+            content: Text('Social login failed. Check provider setup.')),
       );
       return;
     }

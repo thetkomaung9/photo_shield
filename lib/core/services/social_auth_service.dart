@@ -179,8 +179,8 @@ class SocialAuthService {
     final data = exchangeResponse.data is Map<String, dynamic>
         ? exchangeResponse.data as Map<String, dynamic>
         : <String, dynamic>{};
-    final accessToken = data['accessToken']?.toString() ??
-        data['access_token']?.toString();
+    final accessToken =
+        data['accessToken']?.toString() ?? data['access_token']?.toString();
     if (accessToken == null || accessToken.isEmpty) {
       throw StateError('Instagram token exchange failed');
     }
