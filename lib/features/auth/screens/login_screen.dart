@@ -51,7 +51,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _loginWithSocial(SocialPlatform platform) async {
     final connection =
         await ref.read(authProvider.notifier).loginWithSocial(platform);
-    if (!mounted || connection == null) return;
+    if (!mounted) return;
+    if (connection == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Social login failed. Check provider setup.')),
+      );
+      return;
+    }
 
     final message = connection.requiresConsoleSetup
         ? context.tr('socialLoginDemoConnected')

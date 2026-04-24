@@ -2,6 +2,7 @@
 class ApiConstants {
   static const String baseUrl = 'https://api.photoshield.kr/v1';
   static const String ecrmUrl = 'https://ecrm.police.go.kr';
+  static const String instagramAuthExchangePath = '/social/instagram/exchange';
 
   /// Meta Graph API
   ///
@@ -18,6 +19,24 @@ class ApiConstants {
       'https://www.facebook.com/help/contact/144059062408922';
   static const String instagramReportUrl =
       'https://help.instagram.com/contact/383679321740945';
+
+  static String resolveBackendUrl(String pathOrUrl) {
+    if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
+      return pathOrUrl;
+    }
+
+    final base = Uri.parse(baseUrl);
+    final relative = pathOrUrl.startsWith('/')
+        ? pathOrUrl.substring(1)
+        : pathOrUrl;
+    return base.resolve(relative).toString();
+  }
+}
+
+class SocialCallbackSchemes {
+  static const String instagram = 'photoshield-instagram';
+  static const String kakao = 'photoshield-kakao';
+  static const String naver = 'photoshield-naver';
 }
 
 /// SecureStorage 키
@@ -30,6 +49,7 @@ class StorageKeys {
   static const String metaUserToken = 'meta_user_token';
   static const String metaAppToken = 'meta_app_token';
   static const String metaIgUserId = 'meta_ig_user_id';
+  static const String instagramAccessToken = 'instagram_access_token';
   static const String kakaoAccessToken = 'kakao_access_token';
   static const String naverAccessToken = 'naver_access_token';
   static const String livenessVerifiedAt = 'liveness_verified_at';
@@ -73,6 +93,7 @@ class InstagramEnv {
   static const String clientId = String.fromEnvironment('INSTAGRAM_CLIENT_ID');
   static const String redirectUri = String.fromEnvironment(
     'INSTAGRAM_REDIRECT_URI',
+    defaultValue: '${SocialCallbackSchemes.instagram}://auth',
   );
 
   static bool get isConfigured => clientId.isNotEmpty && redirectUri.isNotEmpty;
@@ -82,9 +103,12 @@ class KakaoEnv {
   static const String nativeAppKey = String.fromEnvironment(
     'KAKAO_NATIVE_APP_KEY',
   );
-  static const String redirectUri = String.fromEnvironment(
-    'KAKAO_REDIRECT_URI',
+  static const String callbackScheme = String.fromEnvironment(
+    'KAKAO_CALLBACK_SCHEME',
+    defaultValue: SocialCallbackSchemes.kakao,
   );
+
+  static String get redirectUri => '$callbackScheme://oauth';
 
   static bool get isConfigured => nativeAppKey.isNotEmpty;
 }
@@ -99,6 +123,7 @@ class NaverEnv {
   );
   static const String redirectUri = String.fromEnvironment(
     'NAVER_REDIRECT_URI',
+    defaultValue: '${SocialCallbackSchemes.naver}://auth',
   );
 
   static bool get isConfigured =>
@@ -113,5 +138,13 @@ class MonitoringEnv {
   static const String facebookSuspectPages = String.fromEnvironment(
     'FACEBOOK_SUSPECT_PAGE_IDS',
     defaultValue: '',
+  );
+  static const String kakaoEndpoint = String.fromEnvironment(
+    'KAKAO_MONITOR_ENDPOINT',
+    defaultValue: '/monitoring/kakao/detections',
+  );
+  static const String naverEndpoint = String.fromEnvironment(
+    'NAVER_MONITOR_ENDPOINT',
+    defaultValue: '/monitoring/naver/detections',
   );
 }

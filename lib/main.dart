@@ -2,8 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 
 import 'app.dart';
+import 'core/constants.dart';
 import 'core/services/push_notification_service.dart';
 import 'firebase_options.dart';
 
@@ -21,6 +23,13 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (KakaoEnv.isConfigured) {
+    await KakaoSdk.init(
+      nativeAppKey: KakaoEnv.nativeAppKey,
+      customScheme: KakaoEnv.callbackScheme,
+    );
+  }
 
   // Initialize Firebase with error handling
   try {

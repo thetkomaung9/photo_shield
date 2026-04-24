@@ -44,6 +44,12 @@ class InstagramApiService {
 
   /// 컴파일 타임 또는 SecureStorage 에 저장된 토큰을 반환.
   Future<String?> _userToken() async {
+    final instagramToken = await _storage.read(
+      key: StorageKeys.instagramAccessToken,
+    );
+    if (instagramToken != null && instagramToken.isNotEmpty) {
+      return instagramToken;
+    }
     if (MetaEnv.userToken.isNotEmpty) return MetaEnv.userToken;
     return _storage.read(key: StorageKeys.metaUserToken);
   }
