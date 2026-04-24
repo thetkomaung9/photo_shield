@@ -25,7 +25,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (KakaoEnv.isConfigured) {
-    await KakaoSdk.init(
+    KakaoSdk.init(
       nativeAppKey: KakaoEnv.nativeAppKey,
       customScheme: KakaoEnv.callbackScheme,
     );

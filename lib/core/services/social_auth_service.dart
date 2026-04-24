@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -312,7 +311,7 @@ class SocialAuthService {
     );
     await _storage.write(
       key: StorageKeys.socialConnectedAt(platform.id),
-      value: now.toIso8601String(),
+      value: connectedAt.toIso8601String(),
     );
   }
 
