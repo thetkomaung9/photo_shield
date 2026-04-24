@@ -15,7 +15,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fbMETA_APP_ID_PLACEHOLDER</string>
+				<string>fb919111217415706</string>
 			</array>
 		</dict>
 		<dict>
@@ -54,9 +54,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>FacebookAppID</key>
-	<string>META_APP_ID_PLACEHOLDER</string>
+	<string>919111217415706</string>
 	<key>FacebookClientToken</key>
-	<string>META_CLIENT_TOKEN_PLACEHOLDER</string>
+	<string>9e0363db81432fbb3d8731a602f94c3c</string>
 	<key>FacebookDisplayName</key>
 	<string>Photo Shield</string>
 	<key>LSApplicationQueriesSchemes</key>

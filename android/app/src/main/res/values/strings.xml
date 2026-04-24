@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="facebook_app_id">META_APP_ID_PLACEHOLDER</string>
-    <string name="facebook_client_token">META_CLIENT_TOKEN_PLACEHOLDER</string>
-    <string name="fb_login_protocol_scheme">fbMETA_APP_ID_PLACEHOLDER</string>
+    <string name="facebook_app_id">919111217415706</string>
+    <string name="facebook_client_token">9e0363db81432fbb3d8731a602f94c3c</string>
+    <string name="fb_login_protocol_scheme">fb919111217415706</string>
     <string name="instagram_callback_scheme">photoshield-instagram</string>
     <string name="client_id">NAVER_CLIENT_ID_PLACEHOLDER</string>
     <string name="client_secret">NAVER_CLIENT_SECRET_PLACEHOLDER</string>
