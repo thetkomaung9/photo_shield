@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "photo_shield (Android live)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "192.168.25.54:39941",
+      "args": [
+        "--dart-define=META_APP_ID=919111217415706",
+        "--dart-define=META_CLIENT_TOKEN=9e0363db81432fbb3d8731a602f94c3c"
+      ]
+    },
+    {
+      "name": "photo_shield (iOS live)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "00008110-000158D901D2401E",
+      "args": [
+        "--dart-define=META_APP_ID=919111217415706",
+        "--dart-define=META_CLIENT_TOKEN=9e0363db81432fbb3d8731a602f94c3c"
+      ]
+    }
+  ]
+}
